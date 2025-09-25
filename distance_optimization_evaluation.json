@@ -1,0 +1,16 @@
+{
+  "n_solutions": "1",
+  "best_distance": "0.33917117",
+  "avg_distance": "0.33917117",
+  "std_distance": "0.0",
+  "best_material": "8.516213",
+  "avg_material": "8.516213",
+  "excellent_count": "0",
+  "constraint_satisfied": "1",
+  "success_criteria": "{'best_distance_under_01': np.False_, 'avg_distance_under_03': np.False_, 'constraint_satisfaction_over_90': True, 'elite_ratio_over_10': False, 'convergence_good': np.True_}",
+  "success_count": "2",
+  "grade": "C - Fair",
+  "elite_ratio": "0.0",
+  "convergence_ratio": "0.0",
+  "constraint_satisfaction_rate": "1.0"
+}

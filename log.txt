@@ -1,0 +1,11 @@
+Pure nasa 
+Optimization Summary:
+- Solutions found: 13
+- Hypervolume: 2.0658
+- Best distance: 0.3694
+- Best material: 4.2877
+
+Gradient Optimization Results:
+- Original hypervolume: 2.0658
+- Gradient-enhanced hypervolume: 2.3241
+- Improvement: 0.2583

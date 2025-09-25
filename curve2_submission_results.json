@@ -1,0 +1,752 @@
+[
+  {
+    "distance": 0.2673194110393524,
+    "material": 3.986889123916626,
+    "nodes": 9,
+    "mechanism_id": "9nodes_004"
+  },
+  {
+    "distance": 0.2673194110393524,
+    "material": 3.986889123916626,
+    "nodes": 9,
+    "mechanism_id": "9nodes_013"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_001"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_003"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_006"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_009"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_017"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_023"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_037"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_040"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_055"
+  },
+  {
+    "distance": 0.26785969734191895,
+    "material": 2.8801047801971436,
+    "nodes": 9,
+    "mechanism_id": "9nodes_062"
+  },
+  {
+    "distance": 0.26854607462882996,
+    "material": 2.8405237197875977,
+    "nodes": 9,
+    "mechanism_id": "9nodes_065"
+  },
+  {
+    "distance": 0.26990967988967896,
+    "material": 2.83563232421875,
+    "nodes": 9,
+    "mechanism_id": "9nodes_025"
+  },
+  {
+    "distance": 0.27053123712539673,
+    "material": 2.8236896991729736,
+    "nodes": 9,
+    "mechanism_id": "9nodes_042"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_000"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_002"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_005"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_008"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_016"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_036"
+  },
+  {
+    "distance": 0.27060431241989136,
+    "material": 2.801211357116699,
+    "nodes": 9,
+    "mechanism_id": "9nodes_054"
+  },
+  {
+    "distance": 0.2724098265171051,
+    "material": 2.4630610942840576,
+    "nodes": 9,
+    "mechanism_id": "9nodes_078"
+  },
+  {
+    "distance": 0.27294424176216125,
+    "material": 2.4619946479797363,
+    "nodes": 9,
+    "mechanism_id": "9nodes_032"
+  },
+  {
+    "distance": 0.2729625403881073,
+    "material": 2.461242914199829,
+    "nodes": 9,
+    "mechanism_id": "9nodes_057"
+  },
+  {
+    "distance": 0.27352118492126465,
+    "material": 2.4590933322906494,
+    "nodes": 9,
+    "mechanism_id": "9nodes_010"
+  },
+  {
+    "distance": 0.27352118492126465,
+    "material": 2.4590933322906494,
+    "nodes": 9,
+    "mechanism_id": "9nodes_018"
+  },
+  {
+    "distance": 0.2745724022388458,
+    "material": 2.3737399578094482,
+    "nodes": 9,
+    "mechanism_id": "9nodes_033"
+  },
+  {
+    "distance": 0.2745724022388458,
+    "material": 2.3737399578094482,
+    "nodes": 9,
+    "mechanism_id": "9nodes_050"
+  },
+  {
+    "distance": 0.27616024017333984,
+    "material": 4.19714879989624,
+    "nodes": 8,
+    "mechanism_id": "8nodes_034"
+  },
+  {
+    "distance": 0.2775033414363861,
+    "material": 4.193990707397461,
+    "nodes": 8,
+    "mechanism_id": "8nodes_011"
+  },
+  {
+    "distance": 0.27805542945861816,
+    "material": 2.3627777099609375,
+    "nodes": 9,
+    "mechanism_id": "9nodes_073"
+  },
+  {
+    "distance": 0.2795819640159607,
+    "material": 4.181972503662109,
+    "nodes": 8,
+    "mechanism_id": "8nodes_027"
+  },
+  {
+    "distance": 0.2797834873199463,
+    "material": 4.131807327270508,
+    "nodes": 8,
+    "mechanism_id": "8nodes_032"
+  },
+  {
+    "distance": 0.2798256278038025,
+    "material": 2.359773874282837,
+    "nodes": 9,
+    "mechanism_id": "9nodes_046"
+  },
+  {
+    "distance": 0.28094282746315,
+    "material": 4.130058765411377,
+    "nodes": 8,
+    "mechanism_id": "8nodes_009"
+  },
+  {
+    "distance": 0.28112608194351196,
+    "material": 2.3578763008117676,
+    "nodes": 9,
+    "mechanism_id": "9nodes_069"
+  },
+  {
+    "distance": 0.2811867892742157,
+    "material": 4.051077842712402,
+    "nodes": 8,
+    "mechanism_id": "8nodes_022"
+  },
+  {
+    "distance": 0.28120312094688416,
+    "material": 2.3500077724456787,
+    "nodes": 9,
+    "mechanism_id": "9nodes_061"
+  },
+  {
+    "distance": 0.2813338041305542,
+    "material": 2.347990036010742,
+    "nodes": 9,
+    "mechanism_id": "9nodes_084"
+  },
+  {
+    "distance": 0.2813803553581238,
+    "material": 2.346600294113159,
+    "nodes": 9,
+    "mechanism_id": "9nodes_070"
+  },
+  {
+    "distance": 0.28158482909202576,
+    "material": 4.048125743865967,
+    "nodes": 8,
+    "mechanism_id": "8nodes_001"
+  },
+  {
+    "distance": 0.28158482909202576,
+    "material": 4.048125743865967,
+    "nodes": 8,
+    "mechanism_id": "8nodes_004"
+  },
+  {
+    "distance": 0.28158482909202576,
+    "material": 4.048125743865967,
+    "nodes": 8,
+    "mechanism_id": "8nodes_021"
+  },
+  {
+    "distance": 0.2819187343120575,
+    "material": 2.3460235595703125,
+    "nodes": 9,
+    "mechanism_id": "9nodes_022"
+  },
+  {
+    "distance": 0.2819228768348694,
+    "material": 4.007436275482178,
+    "nodes": 8,
+    "mechanism_id": "8nodes_024"
+  },
+  {
+    "distance": 0.28215569257736206,
+    "material": 3.9970672130584717,
+    "nodes": 8,
+    "mechanism_id": "8nodes_023"
+  },
+  {
+    "distance": 0.28241267800331116,
+    "material": 2.344078540802002,
+    "nodes": 9,
+    "mechanism_id": "9nodes_011"
+  },
+  {
+    "distance": 0.28241267800331116,
+    "material": 2.344078540802002,
+    "nodes": 9,
+    "mechanism_id": "9nodes_019"
+  },
+  {
+    "distance": 0.28241267800331116,
+    "material": 2.344078540802002,
+    "nodes": 9,
+    "mechanism_id": "9nodes_058"
+  },
+  {
+    "distance": 0.28244325518608093,
+    "material": 2.341724395751953,
+    "nodes": 9,
+    "mechanism_id": "9nodes_045"
+  },
+  {
+    "distance": 0.282564640045166,
+    "material": 3.9937446117401123,
+    "nodes": 8,
+    "mechanism_id": "8nodes_002"
+  },
+  {
+    "distance": 0.282564640045166,
+    "material": 3.9937446117401123,
+    "nodes": 8,
+    "mechanism_id": "8nodes_005"
+  },
+  {
+    "distance": 0.2827523350715637,
+    "material": 3.9888498783111572,
+    "nodes": 8,
+    "mechanism_id": "8nodes_020"
+  },
+  {
+    "distance": 0.2829987704753876,
+    "material": 2.336125135421753,
+    "nodes": 9,
+    "mechanism_id": "9nodes_014"
+  },
+  {
+    "distance": 0.2835961878299713,
+    "material": 3.9842464923858643,
+    "nodes": 8,
+    "mechanism_id": "8nodes_000"
+  },
+  {
+    "distance": 0.2835961878299713,
+    "material": 3.9842464923858643,
+    "nodes": 8,
+    "mechanism_id": "8nodes_003"
+  },
+  {
+    "distance": 0.2835961878299713,
+    "material": 3.9842464923858643,
+    "nodes": 8,
+    "mechanism_id": "8nodes_014"
+  },
+  {
+    "distance": 0.2838868498802185,
+    "material": 3.983194589614868,
+    "nodes": 8,
+    "mechanism_id": "8nodes_015"
+  },
+  {
+    "distance": 0.2844582498073578,
+    "material": 2.328638792037964,
+    "nodes": 9,
+    "mechanism_id": "9nodes_007"
+  },
+  {
+    "distance": 0.2844582498073578,
+    "material": 2.328638792037964,
+    "nodes": 9,
+    "mechanism_id": "9nodes_015"
+  },
+  {
+    "distance": 0.2844582498073578,
+    "material": 2.328638792037964,
+    "nodes": 9,
+    "mechanism_id": "9nodes_035"
+  },
+  {
+    "distance": 0.2844582498073578,
+    "material": 2.328638792037964,
+    "nodes": 9,
+    "mechanism_id": "9nodes_053"
+  },
+  {
+    "distance": 0.2850387394428253,
+    "material": 2.2918763160705566,
+    "nodes": 9,
+    "mechanism_id": "9nodes_021"
+  },
+  {
+    "distance": 0.2854619026184082,
+    "material": 2.280515670776367,
+    "nodes": 9,
+    "mechanism_id": "9nodes_039"
+  },
+  {
+    "distance": 0.2859152853488922,
+    "material": 3.6069376468658447,
+    "nodes": 8,
+    "mechanism_id": "8nodes_026"
+  },
+  {
+    "distance": 0.2884252667427063,
+    "material": 3.4895145893096924,
+    "nodes": 8,
+    "mechanism_id": "8nodes_036"
+  },
+  {
+    "distance": 0.29085853695869446,
+    "material": 3.4840476512908936,
+    "nodes": 8,
+    "mechanism_id": "8nodes_025"
+  },
+  {
+    "distance": 0.2910975515842438,
+    "material": 3.1799633502960205,
+    "nodes": 8,
+    "mechanism_id": "8nodes_029"
+  },
+  {
+    "distance": 0.29708337783813477,
+    "material": 2.257920742034912,
+    "nodes": 9,
+    "mechanism_id": "9nodes_056"
+  },
+  {
+    "distance": 0.29741597175598145,
+    "material": 2.2414650917053223,
+    "nodes": 9,
+    "mechanism_id": "9nodes_060"
+  },
+  {
+    "distance": 0.2976948320865631,
+    "material": 2.2411372661590576,
+    "nodes": 9,
+    "mechanism_id": "9nodes_059"
+  },
+  {
+    "distance": 0.29816734790802,
+    "material": 2.233031749725342,
+    "nodes": 9,
+    "mechanism_id": "9nodes_077"
+  },
+  {
+    "distance": 0.29878294467926025,
+    "material": 2.2307379245758057,
+    "nodes": 9,
+    "mechanism_id": "9nodes_083"
+  },
+  {
+    "distance": 0.299082487821579,
+    "material": 2.228900671005249,
+    "nodes": 9,
+    "mechanism_id": "9nodes_068"
+  },
+  {
+    "distance": 0.300900936126709,
+    "material": 2.2250113487243652,
+    "nodes": 9,
+    "mechanism_id": "9nodes_085"
+  },
+  {
+    "distance": 0.30233079195022583,
+    "material": 2.222992181777954,
+    "nodes": 9,
+    "mechanism_id": "9nodes_031"
+  },
+  {
+    "distance": 0.30355554819107056,
+    "material": 2.2187023162841797,
+    "nodes": 9,
+    "mechanism_id": "9nodes_012"
+  },
+  {
+    "distance": 0.30355554819107056,
+    "material": 2.2187023162841797,
+    "nodes": 9,
+    "mechanism_id": "9nodes_020"
+  },
+  {
+    "distance": 0.3043382167816162,
+    "material": 2.2186620235443115,
+    "nodes": 9,
+    "mechanism_id": "9nodes_028"
+  },
+  {
+    "distance": 0.30473875999450684,
+    "material": 2.2115120887756348,
+    "nodes": 9,
+    "mechanism_id": "9nodes_044"
+  },
+  {
+    "distance": 0.305881142616272,
+    "material": 2.2097346782684326,
+    "nodes": 9,
+    "mechanism_id": "9nodes_049"
+  },
+  {
+    "distance": 0.30847108364105225,
+    "material": 2.205448627471924,
+    "nodes": 9,
+    "mechanism_id": "9nodes_038"
+  },
+  {
+    "distance": 0.31134653091430664,
+    "material": 2.1880853176116943,
+    "nodes": 9,
+    "mechanism_id": "9nodes_082"
+  },
+  {
+    "distance": 0.31191855669021606,
+    "material": 2.1831610202789307,
+    "nodes": 9,
+    "mechanism_id": "9nodes_079"
+  },
+  {
+    "distance": 0.31196174025535583,
+    "material": 2.18123197555542,
+    "nodes": 9,
+    "mechanism_id": "9nodes_080"
+  },
+  {
+    "distance": 0.31932076811790466,
+    "material": 2.1737403869628906,
+    "nodes": 9,
+    "mechanism_id": "9nodes_027"
+  },
+  {
+    "distance": 0.31932076811790466,
+    "material": 2.1737403869628906,
+    "nodes": 9,
+    "mechanism_id": "9nodes_067"
+  },
+  {
+    "distance": 0.3275493085384369,
+    "material": 2.1731274127960205,
+    "nodes": 9,
+    "mechanism_id": "9nodes_034"
+  },
+  {
+    "distance": 0.32995620369911194,
+    "material": 3.0334043502807617,
+    "nodes": 8,
+    "mechanism_id": "8nodes_030"
+  },
+  {
+    "distance": 0.3305188715457916,
+    "material": 2.1675877571105957,
+    "nodes": 9,
+    "mechanism_id": "9nodes_052"
+  },
+  {
+    "distance": 0.33100834488868713,
+    "material": 2.1516470909118652,
+    "nodes": 9,
+    "mechanism_id": "9nodes_043"
+  },
+  {
+    "distance": 0.33660852909088135,
+    "material": 3.015964984893799,
+    "nodes": 8,
+    "mechanism_id": "8nodes_007"
+  },
+  {
+    "distance": 0.3397359549999237,
+    "material": 2.941953659057617,
+    "nodes": 8,
+    "mechanism_id": "8nodes_028"
+  },
+  {
+    "distance": 0.3463054597377777,
+    "material": 2.9169442653656006,
+    "nodes": 8,
+    "mechanism_id": "8nodes_035"
+  },
+  {
+    "distance": 0.3478594124317169,
+    "material": 2.142913818359375,
+    "nodes": 9,
+    "mechanism_id": "9nodes_026"
+  },
+  {
+    "distance": 0.3478594124317169,
+    "material": 2.142913818359375,
+    "nodes": 9,
+    "mechanism_id": "9nodes_066"
+  },
+  {
+    "distance": 0.35056397318840027,
+    "material": 2.1058833599090576,
+    "nodes": 9,
+    "mechanism_id": "9nodes_063"
+  },
+  {
+    "distance": 0.3558892011642456,
+    "material": 2.1053104400634766,
+    "nodes": 9,
+    "mechanism_id": "9nodes_024"
+  },
+  {
+    "distance": 0.3600318431854248,
+    "material": 2.892712354660034,
+    "nodes": 8,
+    "mechanism_id": "8nodes_012"
+  },
+  {
+    "distance": 0.36004310846328735,
+    "material": 2.841729164123535,
+    "nodes": 8,
+    "mechanism_id": "8nodes_037"
+  },
+  {
+    "distance": 0.37244483828544617,
+    "material": 2.095238208770752,
+    "nodes": 9,
+    "mechanism_id": "9nodes_072"
+  },
+  {
+    "distance": 0.38169100880622864,
+    "material": 2.8097641468048096,
+    "nodes": 8,
+    "mechanism_id": "8nodes_018"
+  },
+  {
+    "distance": 0.38895681500434875,
+    "material": 1.966709017753601,
+    "nodes": 9,
+    "mechanism_id": "9nodes_071"
+  },
+  {
+    "distance": 0.4036289155483246,
+    "material": 1.9427900314331055,
+    "nodes": 9,
+    "mechanism_id": "9nodes_064"
+  },
+  {
+    "distance": 0.40429604053497314,
+    "material": 1.9365394115447998,
+    "nodes": 9,
+    "mechanism_id": "9nodes_075"
+  },
+  {
+    "distance": 0.40951836109161377,
+    "material": 1.9334651231765747,
+    "nodes": 9,
+    "mechanism_id": "9nodes_074"
+  },
+  {
+    "distance": 0.4208843410015106,
+    "material": 2.7631895542144775,
+    "nodes": 8,
+    "mechanism_id": "8nodes_031"
+  },
+  {
+    "distance": 0.4289546012878418,
+    "material": 2.762216329574585,
+    "nodes": 8,
+    "mechanism_id": "8nodes_008"
+  },
+  {
+    "distance": 0.4316881000995636,
+    "material": 2.7123043537139893,
+    "nodes": 8,
+    "mechanism_id": "8nodes_038"
+  },
+  {
+    "distance": 0.43568605184555054,
+    "material": 2.708324432373047,
+    "nodes": 8,
+    "mechanism_id": "8nodes_033"
+  },
+  {
+    "distance": 0.44920963048934937,
+    "material": 1.9297535419464111,
+    "nodes": 9,
+    "mechanism_id": "9nodes_047"
+  },
+  {
+    "distance": 0.47166669368743896,
+    "material": 1.923530101776123,
+    "nodes": 9,
+    "mechanism_id": "9nodes_029"
+  },
+  {
+    "distance": 0.47544360160827637,
+    "material": 1.8941502571105957,
+    "nodes": 9,
+    "mechanism_id": "9nodes_030"
+  },
+  {
+    "distance": 0.47544360160827637,
+    "material": 1.8941502571105957,
+    "nodes": 9,
+    "mechanism_id": "9nodes_076"
+  },
+  {
+    "distance": 0.4797860383987427,
+    "material": 1.8903565406799316,
+    "nodes": 9,
+    "mechanism_id": "9nodes_081"
+  },
+  {
+    "distance": 0.513591468334198,
+    "material": 1.890284776687622,
+    "nodes": 9,
+    "mechanism_id": "9nodes_041"
+  },
+  {
+    "distance": 0.5433428883552551,
+    "material": 1.8457036018371582,
+    "nodes": 9,
+    "mechanism_id": "9nodes_048"
+  },
+  {
+    "distance": 0.5473818182945251,
+    "material": 2.6933858394622803,
+    "nodes": 8,
+    "mechanism_id": "8nodes_010"
+  },
+  {
+    "distance": 0.569248616695404,
+    "material": 2.69267201423645,
+    "nodes": 8,
+    "mechanism_id": "8nodes_013"
+  },
+  {
+    "distance": 0.6270205974578857,
+    "material": 1.8351696729660034,
+    "nodes": 9,
+    "mechanism_id": "9nodes_051"
+  },
+  {
+    "distance": 0.660823404788971,
+    "material": 2.689391613006592,
+    "nodes": 8,
+    "mechanism_id": "8nodes_006"
+  },
+  {
+    "distance": 0.696997344493866,
+    "material": 2.6690807342529297,
+    "nodes": 8,
+    "mechanism_id": "8nodes_017"
+  },
+  {
+    "distance": 0.7455325126647949,
+    "material": 2.666795253753662,
+    "nodes": 8,
+    "mechanism_id": "8nodes_019"
+  },
+  {
+    "distance": 0.7491929531097412,
+    "material": 2.5105998516082764,
+    "nodes": 8,
+    "mechanism_id": "8nodes_016"
+  }
+]
