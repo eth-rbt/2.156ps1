@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 """
-Multi-Node Recursive Single Curve Optimization Script
+TEST: 2-Iteration Multi-Node Recursive Optimization Script
+
+This is a test version with reduced parameters:
+- Only 2 iterations per optimization run (instead of 12)
+- Smaller population sizes for faster execution
+- Testing submission format saving functionality
 
 This script runs the recursive optimization approach across different node configurations
-(5, 6, 7 nodes) and combines all Pareto fronts into a single visualization.
-
-For each node configuration:
-1. Sample 4000 mechanisms, filter at (3,12), plot initial distribution at (0.75,10)
-2. For each iteration (5 total):
-   (1) Run GA on current cluster
-   (2) Apply material-only gradient descent on frontier
-   (3) Apply distance-only gradient descent on original frontier
-   (4) Combine all 3 groups, plot and calculate HV
-   (5) Use combined cluster for next iteration
-3. Extract final Pareto frontier for that node configuration
-4. Combine all node configurations into single plot
+and saves submission data to test the format.
 """
 
 import numpy as np
@@ -24,6 +18,7 @@ import matplotlib.pyplot as plt
 import time
 import json
 import os
+import traceback
 from utils import (
     setup_environment,
     load_target_curves,
@@ -287,10 +282,10 @@ def mechanisms_from_gradient_results(grad_results, original_mechs):
     return mechanisms
 
 
-def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4000,
-                                     num_iterations=12, pop_size=200, n_gen=100,
-                                     step_sizes_material=[2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5],
-                                     step_sizes_distance=[2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]):
+def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=1000,
+                                     num_iterations=2, pop_size=50, n_gen=50,
+                                     step_sizes_material=[2e-4, 1e-4],
+                                     step_sizes_distance=[2e-4, 1e-4]):
     """
     Run recursive optimization for a single node configuration.
 
@@ -561,11 +556,11 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
 
 
 def create_output_directory():
-    """Create output directory for overnight run results."""
+    """Create output directory for test run results."""
     timestamp = time.strftime('%Y%m%d_%H%M%S')
-    output_dir = f"overnight_run_{timestamp}"
+    output_dir = f"TEST_saving_2iter_{timestamp}"
     os.makedirs(output_dir, exist_ok=True)
-    print(f"Created output directory: {output_dir}")
+    print(f"Created TEST output directory: {output_dir}")
     return output_dir
 
 
@@ -573,11 +568,13 @@ def multi_node_recursive_optimization():
     """
     Run recursive optimization across multiple node configurations and combine results.
     """
-    print("=== MULTI-NODE RECURSIVE OPTIMIZATION ===")
+    print("=== TEST: 2-ITERATION SAVING VALIDATION ===")
+    print("🧪 TESTING SUBMISSION SAVING WITH REDUCED PARAMETERS")
     print("Running optimization for ALL 6 CURVES")
     print("5, 8, and 9 nodes (2 iterations each = 6 total per curve)")
-    print("Total: 36 optimization runs")
-    print("="*50)
+    print("Total: 36 optimization runs (REDUCED SCALE FOR TESTING)")
+    print("Parameters: 1000 mechanisms, 50 pop_size, 50 n_gen, 2 recursive iterations")
+    print("="*70)
 
     # Create output directory
     output_dir = create_output_directory()
@@ -588,9 +585,9 @@ def multi_node_recursive_optimization():
     # Load target curves
     target_curves = load_target_curves()
 
-    # Define step sizes for each iteration (12 iterations per run)
-    step_sizes_material = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
-    step_sizes_distance = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
+    # Define step sizes for each iteration (2 iterations per run for testing)
+    step_sizes_material = [2e-4, 1e-4]
+    step_sizes_distance = [2e-4, 1e-4]
 
     node_configurations = [5, 8, 9]
     num_iterations_per_config = 2
@@ -620,10 +617,10 @@ def multi_node_recursive_optimization():
                 hypervolumes, final_pareto_F, final_mechanisms = recursive_optimization_single_node(
                     target_curve,
                     num_nodes=num_nodes,
-                    num_mechanisms=8000,  # Back to original
-                    num_iterations=12,    # Increased to 12 iterations
-                    pop_size=100,         # Back to original
-                    n_gen=200,            # Back to original
+                    num_mechanisms=1000,  # Reduced for testing
+                    num_iterations=2,     # Testing with 2 iterations
+                    pop_size=50,          # Reduced for testing
+                    n_gen=50,             # Reduced for testing
                     step_sizes_material=step_sizes_material,
                     step_sizes_distance=step_sizes_distance
                 )
@@ -1145,3 +1142,11 @@ if __name__ == "__main__":
 
         print(f"Error details saved to: {error_log_path}")
         raise
+
+
+if __name__ == "__main__":
+    print("🧪 STARTING TEST RUN - 2 ITERATIONS ONLY")
+    print("This test will validate the submission saving format with reduced parameters")
+    print("Expected runtime: 5-15 minutes")
+    print("-" * 70)
+    multi_node_recursive_optimization()
