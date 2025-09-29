@@ -18,7 +18,12 @@ For each node configuration:
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend for overnight runs
 import matplotlib.pyplot as plt
+import time
+import json
+import os
 from utils import (
     setup_environment,
     load_target_curves,
@@ -548,102 +553,147 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
     return hypervolumes, None
 
 
+def create_output_directory():
+    """Create output directory for overnight run results."""
+    timestamp = time.strftime('%Y%m%d_%H%M%S')
+    output_dir = f"overnight_run_{timestamp}"
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Created output directory: {output_dir}")
+    return output_dir
+
+
 def multi_node_recursive_optimization():
     """
     Run recursive optimization across multiple node configurations and combine results.
     """
     print("=== MULTI-NODE RECURSIVE OPTIMIZATION ===")
-    print("Running optimization for 7, 8, and 9 nodes (3 runs each = 9 total epochs)")
+    print("Running optimization for ALL 6 CURVES")
+    print("5, 8, and 9 nodes (2 iterations each = 6 total per curve)")
+    print("Total: 36 optimization runs")
     print("="*50)
+
+    # Create output directory
+    output_dir = create_output_directory()
 
     # Setup environment
     setup_environment()
 
     # Load target curves
     target_curves = load_target_curves()
-    target_curve = target_curves[1]  # Curve 2 (index 1)
 
-    # Define step sizes for each iteration (adjustable) - 16 iterations
-    step_sizes_material = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5]
-    step_sizes_distance = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5]
+    # Define step sizes for each iteration (reduced for faster runs)
+    step_sizes_material = [2e-4, 1e-4]
+    step_sizes_distance = [2e-4, 1e-4]
 
     node_configurations = [5, 8, 9]
-    num_runs_per_config = 3
+    num_iterations_per_config = 2
     colors = ['blue', 'green', 'red']
     markers = ['o', 's', '^']
 
     all_results = {}
-    all_epochs = []  # Store all 9 epoch results
+    all_epochs = []  # Store all results
 
-    # Run optimization for each node configuration, multiple times each
-    for config_idx, num_nodes in enumerate(node_configurations):
-        node_results = []
+    # Run optimization for each curve
+    for curve_idx, target_curve in enumerate(target_curves):
+        print(f"\n\n{'='*80}")
+        print(f"OPTIMIZING CURVE {curve_idx + 1} of {len(target_curves)}")
+        print(f"{'='*80}")
 
-        for run_idx in range(num_runs_per_config):
-            print(f"\n\n{'#'*80}")
-            print(f"STARTING OPTIMIZATION FOR {num_nodes} NODES - RUN {run_idx + 1}/{num_runs_per_config}")
-            print(f"{'#'*80}")
+        curve_results = {}
 
-            hypervolumes, final_pareto_F = recursive_optimization_single_node(
-                target_curve,
-                num_nodes=num_nodes,
-                num_mechanisms=8000,
-                num_iterations=10,
-                pop_size=100,
-                n_gen=200,
-                step_sizes_material=step_sizes_material,
-                step_sizes_distance=step_sizes_distance
-            )
+        # Run optimization for each node configuration
+        for config_idx, num_nodes in enumerate(node_configurations):
+            node_results = []
 
-            run_result = {
-                'hypervolumes': hypervolumes,
-                'pareto_front': final_pareto_F,
-                'num_nodes': num_nodes,
-                'run_id': run_idx + 1,
-                'epoch_id': f"{num_nodes}nodes_run{run_idx + 1}",
-                'color': colors[config_idx],
-                'marker': markers[config_idx]
-            }
+            for iteration_idx in range(num_iterations_per_config):
+                print(f"\n\n{'#'*80}")
+                print(f"CURVE {curve_idx + 1} - {num_nodes} NODES - ITERATION {iteration_idx + 1}/{num_iterations_per_config}")
+                print(f"{'#'*80}")
 
-            node_results.append(run_result)
-            all_epochs.append(run_result)
+                hypervolumes, final_pareto_F = recursive_optimization_single_node(
+                    target_curve,
+                    num_nodes=num_nodes,
+                    num_mechanisms=4000,  # Reduced for faster runs
+                    num_iterations=2,     # Reduced for faster runs
+                    pop_size=50,          # Reduced for faster runs
+                    n_gen=100,            # Reduced for faster runs
+                    step_sizes_material=step_sizes_material,
+                    step_sizes_distance=step_sizes_distance
+                )
 
-            print(f"Completed {num_nodes} nodes, run {run_idx + 1}")
-            if final_pareto_F is not None:
-                print(f"  - Pareto front size: {len(final_pareto_F)}")
-                print(f"  - Best distance: {min(final_pareto_F[:, 0]):.6f}")
-                print(f"  - Best material: {min(final_pareto_F[:, 1]):.4f}")
+                run_result = {
+                    'hypervolumes': hypervolumes,
+                    'pareto_front': final_pareto_F,
+                    'curve_id': curve_idx + 1,
+                    'num_nodes': num_nodes,
+                    'iteration_id': iteration_idx + 1,
+                    'epoch_id': f"curve{curve_idx + 1}_{num_nodes}nodes_iter{iteration_idx + 1}",
+                    'color': colors[config_idx],
+                    'marker': markers[config_idx]
+                }
 
-        all_results[num_nodes] = node_results
+                node_results.append(run_result)
+                all_epochs.append(run_result)
 
-        print(f"\nCompleted optimization for {num_nodes} nodes")
-        if final_pareto_F is not None:
-            print(f"Final Pareto frontier: {len(final_pareto_F)} solutions")
-            print(f"Best distance: {min(final_pareto_F[:, 0]):.4f}")
-            print(f"Best material: {min(final_pareto_F[:, 1]):.4f}")
-        else:
-            print("No final Pareto frontier found")
+                print(f"Completed curve {curve_idx + 1}, {num_nodes} nodes, iteration {iteration_idx + 1}")
+                if final_pareto_F is not None:
+                    print(f"  - Pareto front size: {len(final_pareto_F)}")
+                    print(f"  - Best distance: {min(final_pareto_F[:, 0]):.6f}")
+                    print(f"  - Best material: {min(final_pareto_F[:, 1]):.4f}")
+
+                # Save intermediate results after each run
+                intermediate_save = {
+                    'completed_runs': len(all_epochs),
+                    'current_curve': curve_idx + 1,
+                    'current_node': num_nodes,
+                    'current_iteration': iteration_idx + 1,
+                    'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+                    'all_runs': []
+                }
+
+                for epoch in all_epochs:
+                    epoch_data = {
+                        'curve_id': epoch['curve_id'],
+                        'num_nodes': epoch['num_nodes'],
+                        'iteration_id': epoch['iteration_id'],
+                        'epoch_id': epoch['epoch_id'],
+                        'hypervolumes': epoch['hypervolumes'],
+                        'pareto_front_size': len(epoch['pareto_front']) if epoch['pareto_front'] is not None else 0
+                    }
+                    intermediate_save['all_runs'].append(epoch_data)
+
+                intermediate_path = os.path.join(output_dir, 'intermediate_save.json')
+                with open(intermediate_path, 'w') as f:
+                    json.dump(intermediate_save, f, indent=2)
+                print(f"Intermediate results saved to {intermediate_path} ({len(all_epochs)} runs completed)")
+
+            curve_results[num_nodes] = node_results
+
+        all_results[f'curve_{curve_idx + 1}'] = curve_results
+
+        print(f"\nCompleted optimization for curve {curve_idx + 1}")
+        curve_pareto_count = sum(len(run['pareto_front']) if run['pareto_front'] is not None else 0
+                               for node_results in curve_results.values()
+                               for run in node_results)
+        print(f"Total Pareto solutions for curve {curve_idx + 1}: {curve_pareto_count}")
 
     # Create comprehensive visualization
     print(f"\n{'='*80}")
-    print("CREATING COMPREHENSIVE VISUALIZATION - 9 EPOCHS")
+    print("CREATING COMPREHENSIVE VISUALIZATION - ALL 6 CURVES")
     print(f"{'='*80}")
 
     hv_indicator = HV(np.array([0.75, 10.0]))
 
-    # (1) FINAL COMBINED PLOT - All 9 epochs
-    print("Creating Plot 1: Final combined plot with all 9 epochs...")
+    # (1) FINAL COMBINED PLOT - All curves and runs
+    print("Creating Plot 1: Final combined plot with all curves and runs...")
     plt.figure(figsize=(14, 10))
 
     all_distances = []
     all_materials = []
 
-    # Define colors and markers for each run
-    run_colors = {5: ['lightblue', 'blue', 'darkblue'],
-                  6: ['lightgreen', 'green', 'darkgreen'],
-                  7: ['lightcoral', 'red', 'darkred'],
-                  8: ['lightgreen', 'green', 'darkgreen'],
-                  9: ['lightcoral', 'red', 'darkred']}
+    # Define colors for curves and nodes
+    curve_colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown']
+    node_colors = {5: 'lightblue', 8: 'lightgreen', 9: 'lightcoral'}
     run_markers = ['o', 's', '^']
 
     for epoch in all_epochs:
@@ -655,16 +705,16 @@ def multi_node_recursive_optimization():
             all_distances.extend(distances)
             all_materials.extend(materials)
 
-            # Use run-specific color and marker
-            run_color = run_colors[epoch['num_nodes']][epoch['run_id'] - 1]
+            # Use curve and node specific color
+            curve_color = curve_colors[epoch['curve_id'] - 1]
 
             plt.scatter(distances, materials,
                        alpha=0.6, s=40,
-                       c=run_color,
-                       marker=run_markers[epoch['run_id'] - 1],
+                       c=curve_color,
+                       marker=run_markers[epoch['num_nodes'] // 3 - 1],  # 5->0, 8->1, 9->2
                        edgecolors='black',
                        linewidth=0.5,
-                       label=f"{epoch['num_nodes']} nodes, Run {epoch['run_id']} ({len(F)} pts)")
+                       label=f"C{epoch['curve_id']} {epoch['num_nodes']}n I{epoch['iteration_id']} ({len(F)} pts)")
 
     # Add constraint lines
     plt.axvline(x=0.75, color='red', linestyle='--', alpha=0.8, linewidth=3, label='Distance constraint')
@@ -682,9 +732,9 @@ def multi_node_recursive_optimization():
             combined_pareto_indices = fronts[0]
             combined_pareto_F = combined_F[combined_pareto_indices]
             combined_pareto_hv = hv_indicator(combined_pareto_F)
-            title_text = f'All 9 Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f} | Pareto HV: {combined_pareto_hv:.3f} ({len(combined_pareto_F)} frontier pts)'
+            title_text = f'All 6 Curves: 5, 8, 9 Node Configurations (2 iterations each)\nCombined HV: {combined_hv:.3f} | Pareto HV: {combined_pareto_hv:.3f} ({len(combined_pareto_F)} frontier pts)'
         else:
-            title_text = f'All 9 Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f}'
+            title_text = f'All 6 Curves: 5, 8, 9 Node Configurations (2 iterations each)\nCombined HV: {combined_hv:.3f}'
 
     plt.xlabel('Distance', fontsize=12)
     plt.ylabel('Material', fontsize=12)
@@ -697,7 +747,10 @@ def multi_node_recursive_optimization():
         plt.ylim(0, min(max(all_materials) * 1.1, 12.0))
 
     plt.tight_layout()
-    plt.show()
+    plot_path = os.path.join(output_dir, 'combined_results.png')
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {plot_path}")
 
     # (2) 3×3 GRID PLOTS - Individual results
     print("Creating Plot 2: 3×3 grid showing individual epoch results...")
@@ -736,7 +789,10 @@ def multi_node_recursive_optimization():
 
     plt.suptitle('Individual Epoch Results: 3×3 Grid (9 Total Runs)', fontsize=16, fontweight='bold')
     plt.tight_layout()
-    plt.show()
+    plot_path = os.path.join(output_dir, 'individual_epochs.png')
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {plot_path}")
 
     # (3) AVERAGED HV GROWTH CURVES
     print("Creating Plot 3: Averaged HV growth curves for 7, 8, 9 nodes...")
@@ -786,7 +842,10 @@ def multi_node_recursive_optimization():
     plt.legend(fontsize=12)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.show()
+    plot_path = os.path.join(output_dir, 'hv_growth.png')
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {plot_path}")
 
     # (4) HV PLOT WITH FRONTIER HIGHLIGHTED
     print("Creating Plot 4: HV comparison with frontier solutions highlighted...")
@@ -853,7 +912,10 @@ def multi_node_recursive_optimization():
                 ax2.set_ylim(0, min(max(all_materials) * 1.1, 12.0))
 
     plt.tight_layout()
-    plt.show()
+    plot_path = os.path.join(output_dir, 'best_frontier.png')
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {plot_path}")
 
     # Print summary statistics
     print(f"\n{'='*80}")
@@ -886,36 +948,50 @@ def multi_node_recursive_optimization():
     print("SAVING RESULTS FOR SUBMISSION")
     print(f"{'='*80}")
 
-    # Collect all final mechanisms from both configurations
+    # Collect all final mechanisms from all curves and configurations
     all_final_mechanisms = []
 
-    for num_nodes, results in all_results.items():
-        if results['pareto_front'] is not None:
-            F = results['pareto_front']
-            print(f"\n{num_nodes} nodes: {len(F)} Pareto optimal solutions")
+    for curve_key, curve_results in all_results.items():
+        for num_nodes, node_results in curve_results.items():
+            for run in node_results:
+                if run['pareto_front'] is not None:
+                    F = run['pareto_front']
+                    curve_id = run['curve_id']
+                    iteration_id = run['iteration_id']
 
-            # For submission, we need mechanism representations, not just F values
-            # Since we only have F values from the final Pareto front,
-            # we'll save those and note the configuration
-            for i, f_vals in enumerate(F):
-                mechanism_data = {
-                    'distance': float(f_vals[0]),
-                    'material': float(f_vals[1]),
-                    'nodes': int(num_nodes),
-                    'mechanism_id': f"{num_nodes}nodes_{i:03d}"
-                }
-                all_final_mechanisms.append(mechanism_data)
+                    print(f"\nCurve {curve_id}, {num_nodes} nodes, iteration {iteration_id}: {len(F)} Pareto solutions")
+
+                    # Create submission mechanisms for each Pareto solution
+                    for i, f_vals in enumerate(F):
+                        mechanism_data = {
+                            'distance': float(f_vals[0]),
+                            'material': float(f_vals[1]),
+                            'curve_id': curve_id,
+                            'nodes': int(num_nodes),
+                            'iteration_id': iteration_id,
+                            'mechanism_id': f"C{curve_id}_{num_nodes}n_I{iteration_id}_{i:03d}"
+                        }
+                        all_final_mechanisms.append(mechanism_data)
 
     # Sort by distance (best first)
     all_final_mechanisms.sort(key=lambda x: x['distance'])
 
-    print(f"\nTotal mechanisms for submission: {len(all_final_mechanisms)}")
-    print(f"Best distance: {all_final_mechanisms[0]['distance']:.6f}")
-    print(f"Best material: {min(m['material'] for m in all_final_mechanisms):.4f}")
+    print(f"\nTotal mechanisms from all curves for submission: {len(all_final_mechanisms)}")
+    if all_final_mechanisms:
+        print(f"Best distance: {all_final_mechanisms[0]['distance']:.6f}")
+        print(f"Best material: {min(m['material'] for m in all_final_mechanisms):.4f}")
+
+        # Show curve distribution
+        curve_counts = {}
+        for m in all_final_mechanisms:
+            curve_id = m['curve_id']
+            curve_counts[curve_id] = curve_counts.get(curve_id, 0) + 1
+
+        print(f"Solutions per curve: {dict(sorted(curve_counts.items()))}")
 
     # Save as JSON for analysis
-    import json
-    with open('curve2_submission_results.json', 'w') as f:
+    json_path = os.path.join(output_dir, 'submission_results.json')
+    with open(json_path, 'w') as f:
         json.dump(all_final_mechanisms, f, indent=2)
 
     # Save distances and materials as numpy arrays for direct submission
@@ -926,23 +1002,54 @@ def multi_node_recursive_optimization():
     submission_array = np.column_stack([distances, materials])
 
     # Save as .npy file for submission
-    np.save('curve2_submission_pareto_front.npy', submission_array)
+    npy_path = os.path.join(output_dir, 'submission_pareto_front.npy')
+    np.save(npy_path, submission_array)
 
     print(f"\nSaved results:")
-    print(f"- curve2_submission_results.json (detailed results)")
-    print(f"- curve2_submission_pareto_front.npy (submission array shape: {submission_array.shape})")
+    print(f"- {json_path} (detailed results)")
+    print(f"- {npy_path} (submission array shape: {submission_array.shape})")
 
     # Display top 10 solutions
-    print(f"\nTop 10 solutions:")
-    print(f"{'Rank':<4} {'Distance':<10} {'Material':<10} {'Nodes':<6} {'ID'}")
-    print("-" * 50)
-    for i in range(min(10, len(all_final_mechanisms))):
-        m = all_final_mechanisms[i]
-        print(f"{i+1:<4} {m['distance']:<10.6f} {m['material']:<10.4f} {m['nodes']:<6} {m['mechanism_id']}")
+    if all_final_mechanisms:
+        print(f"\nTop 10 solutions:")
+        print(f"{'Rank':<4} {'Distance':<10} {'Material':<10} {'Curve':<6} {'Nodes':<6} {'Iter':<5} {'ID'}")
+        print("-" * 70)
+        for i in range(min(10, len(all_final_mechanisms))):
+            m = all_final_mechanisms[i]
+            print(f"{i+1:<4} {m['distance']:<10.6f} {m['material']:<10.4f} {m['curve_id']:<6} {m['nodes']:<6} {m['iteration_id']:<5} {m['mechanism_id']}")
 
     return all_results
 
 
 if __name__ == "__main__":
-    results = multi_node_recursive_optimization()
-    print("\n=== Multi-Node Recursive Optimization Complete! ===")
+    import traceback
+
+    start_time = time.time()
+    print(f"Starting overnight run at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    try:
+        results = multi_node_recursive_optimization()
+        print("\n=== Multi-Node Recursive Optimization Complete! ===")
+
+        end_time = time.time()
+        total_hours = (end_time - start_time) / 3600
+        print(f"Total runtime: {total_hours:.2f} hours")
+        print(f"Finished at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    except Exception as e:
+        print(f"\n!!! CRITICAL ERROR IN OVERNIGHT RUN !!!")
+        print(f"Error occurred at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Error: {str(e)}")
+        print(f"Traceback:")
+        traceback.print_exc()
+
+        # Save error information
+        error_log_path = f"overnight_run_error_{time.strftime('%Y%m%d_%H%M%S')}.txt"
+        with open(error_log_path, 'w') as f:
+            f.write(f"Error occurred at: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Error: {str(e)}\n")
+            f.write("Traceback:\n")
+            f.write(traceback.format_exc())
+
+        print(f"Error details saved to: {error_log_path}")
+        raise
