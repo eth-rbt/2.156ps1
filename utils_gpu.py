@@ -1,8 +1,8 @@
 """
-Advanced Linkage Synthesis Optimization Utilities
+Advanced Linkage Synthesis Optimization Utilities - GPU Version
 
-This module contains clean utility functions extracted from the Advanced_Starter_Notebook.ipynb
-for advanced linkage mechanism synthesis and optimization.
+This module contains GPU-optimized utility functions for advanced linkage mechanism
+synthesis and optimization on NVIDIA GPUs.
 """
 
 import os
@@ -33,11 +33,11 @@ from LINKS.CP import make_empty_submission, evaluate_submission
 class AdvancedMechanismOptimizer:
     """
     Advanced mechanism synthesis optimizer that handles full mechanism generation
-    including both structure and position optimization.
+    including both structure and position optimization - GPU optimized.
     """
 
-    def __init__(self, device='cpu'):
-        """Initialize the optimizer with specified device."""
+    def __init__(self, device='cuda'):
+        """Initialize the optimizer with GPU device."""
         self.device = device
         self.tools = Tools(device=device)
         self.tools.compile()
@@ -55,7 +55,7 @@ class AdvancedMechanismOptimizer:
 
     def create_mixed_variable_problem(self, target_curve, N=7):
         """Create a mixed variable optimization problem for full mechanism synthesis."""
-        return MechanismSynthesisOptimization(target_curve, N)
+        return MechanismSynthesisOptimization(target_curve, N, device=self.device)
 
     def run_mixed_variable_optimization(self, target_curve, N=7, pop_size=100, n_gen=100,
                                       initial_mechanisms=None, verbose=True):
@@ -146,7 +146,7 @@ class AdvancedMechanismOptimizer:
         done_optimizing = np.zeros(len(x), dtype=bool)
         x_last = x.copy()
 
-        for step in trange(n_steps, desc="Gradient optimization"):
+        for step in trange(n_steps, desc="GPU Gradient optimization"):
             distances, materials, distance_grads, material_grads = self.diff_tools(
                 x, edges, fixed_joints, motors, target_curve, target_idxs
             )
@@ -284,19 +284,20 @@ class AdvancedMechanismOptimizer:
 
 class MechanismSynthesisOptimization(ElementwiseProblem):
     """
-    Mixed variable optimization problem for mechanism synthesis.
+    Mixed variable optimization problem for mechanism synthesis - GPU optimized.
     Optimizes both mechanism structure and joint positions.
     """
 
-    def __init__(self, target_curve, N=5):
+    def __init__(self, target_curve, N=5, device='cuda'):
         self.N = N
         self.target_curve = target_curve
+        self.device = device
 
         # Global optimization tools (defined outside class due to pymoo deepcopy limitations)
-        global PROBLEM_TOOLS
-        if 'PROBLEM_TOOLS' not in globals():
-            PROBLEM_TOOLS = Tools(device='cpu')
-            PROBLEM_TOOLS.compile()
+        global PROBLEM_TOOLS_GPU
+        if 'PROBLEM_TOOLS_GPU' not in globals():
+            PROBLEM_TOOLS_GPU = Tools(device=device)
+            PROBLEM_TOOLS_GPU.compile()
 
         variables = dict()
 
@@ -387,7 +388,7 @@ class MechanismSynthesisOptimization(ElementwiseProblem):
         """Evaluate mechanism for objectives and constraints."""
         x0, edges, fixed_joints, motor, target_idx = self.convert_1D_to_mech(x)
 
-        distance, material = PROBLEM_TOOLS(
+        distance, material = PROBLEM_TOOLS_GPU(
             x0, edges, fixed_joints, motor, self.target_curve, target_idx=target_idx
         )
 
@@ -395,9 +396,9 @@ class MechanismSynthesisOptimization(ElementwiseProblem):
         out["G"] = out["F"] - np.array([0.75, 10.0])  # Constraints
 
 
-def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, use_gradient=True):
+def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, use_gradient=True, device='cuda'):
     """
-    Run advanced optimization for all target curves.
+    Run advanced optimization for all target curves - GPU optimized.
 
     Args:
         target_curves: Array of target curves
@@ -405,16 +406,17 @@ def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, us
         pop_size: Population size for GA
         n_gen: Number of generations
         use_gradient: Whether to apply gradient optimization
+        device: Device to use ('cuda' for GPU)
 
     Returns:
         Complete submission dictionary and results
     """
-    optimizer = AdvancedMechanismOptimizer()
+    optimizer = AdvancedMechanismOptimizer(device=device)
     submission = make_empty_submission()
     all_results = {}
 
     for i, target_curve in enumerate(target_curves):
-        print(f"\nOptimizing Problem {i+1}...")
+        print(f"\nOptimizing Problem {i+1} on {device.upper()}...")
 
         # Generate initial mechanisms
         initial_mechs = optimizer.generate_random_mechanisms(pop_size, N)
@@ -427,7 +429,7 @@ def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, us
         if results.X is not None:
             # Apply gradient optimization if requested
             if use_gradient:
-                print(f"Applying gradient optimization for Problem {i+1}...")
+                print(f"Applying GPU gradient optimization for Problem {i+1}...")
                 grad_results, original_mechs = optimizer.apply_gradient_optimization(
                     results, problem, target_curve
                 )
@@ -444,7 +446,7 @@ def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, us
                                     combined_motors, combined_target_idxs)
 
                     hv, F = optimizer.evaluate_hypervolume(combined_mechs, target_curve)
-                    print(f"Problem {i+1} hypervolume after gradient optimization: {hv:.4f}")
+                    print(f"Problem {i+1} hypervolume after GPU gradient optimization: {hv:.4f}")
 
             # Create submission
             submission_list = optimizer.create_submission_from_results(results, problem, i+1)
@@ -456,9 +458,10 @@ def optimize_all_targets_advanced(target_curves, N=7, pop_size=100, n_gen=50, us
     return submission, all_results
 
 
-def setup_environment():
-    """Setup environment for optimization."""
-    os.environ["JAX_PLATFORMS"] = "cpu"
+def setup_environment_gpu():
+    """Setup environment for GPU optimization."""
+    os.environ["JAX_PLATFORMS"] = "gpu"  # Use GPU
+    os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.8"  # Use 80% of GPU memory
     np.random.seed(0)
     random.seed(0)
 
@@ -468,31 +471,32 @@ def load_target_curves(filepath='target_curves.npy'):
     return np.load(filepath)
 
 
-def save_submission(submission, filepath='advanced_submission.npy'):
+def save_submission(submission, filepath='advanced_submission_gpu.npy'):
     """Save submission to file."""
     np.save(filepath, submission)
     return filepath
 
 
-def filter_feasible_mechanisms(mechanisms, target_curve, feasibility_threshold=(0.75, 10.0)):
+def filter_feasible_mechanisms(mechanisms, target_curve, feasibility_threshold=(0.75, 10.0), device='cuda'):
     """
-    Filter mechanisms based on feasibility constraints.
+    Filter mechanisms based on feasibility constraints - GPU optimized.
 
     Args:
         mechanisms: List of mechanism dictionaries
         target_curve: Target curve to evaluate against
         feasibility_threshold: Tuple of (max_distance, max_material)
+        device: Device to use for computation
 
     Returns:
         List of feasible mechanisms and their performance metrics
     """
-    tools = Tools(device='cpu')
+    tools = Tools(device=device)
     tools.compile()
 
     feasible_mechanisms = []
     performance_metrics = []
 
-    for mech in tqdm(mechanisms, desc="Filtering feasible mechanisms"):
+    for mech in tqdm(mechanisms, desc="GPU filtering feasible mechanisms"):
         try:
             distance, material = tools(
                 mech['x0'],
@@ -527,9 +531,9 @@ def plot_single_curve(target_curve, curve_index=0, title="Target Curve"):
     plt.show()
 
 
-def run_nsga2_optimization(mechanisms, target_curve, N=7, pop_size=100, n_gen=100, verbose=True):
+def run_nsga2_optimization(mechanisms, target_curve, N=7, pop_size=100, n_gen=100, verbose=True, device='cuda'):
     """
-    Run NSGA-II optimization using pre-filtered feasible mechanisms.
+    Run NSGA-II optimization using pre-filtered feasible mechanisms - GPU optimized.
 
     Args:
         mechanisms: List of feasible mechanism dictionaries
@@ -538,11 +542,12 @@ def run_nsga2_optimization(mechanisms, target_curve, N=7, pop_size=100, n_gen=10
         pop_size: Population size
         n_gen: Number of generations
         verbose: Whether to show optimization progress
+        device: Device to use for computation
 
     Returns:
         Optimization results and problem instance
     """
-    problem = MechanismSynthesisOptimization(target_curve, N)
+    problem = MechanismSynthesisOptimization(target_curve, N, device=device)
 
     # Convert mechanisms to 1D representation
     initial_population = [problem.convert_mech_to_1D(**mech) for mech in mechanisms]
@@ -577,7 +582,7 @@ def run_nsga2_optimization(mechanisms, target_curve, N=7, pop_size=100, n_gen=10
     return results, problem
 
 
-def plot_hypervolume_results(results, ref_point=None, title="Optimization Results"):
+def plot_hypervolume_results(results, ref_point=None, title="GPU Optimization Results"):
     """Plot hypervolume results from optimization."""
     if results.X is None:
         print("No solutions found!")
@@ -600,81 +605,17 @@ def plot_hypervolume_results(results, ref_point=None, title="Optimization Result
     return hypervolume
 
 
-def plot_initial_distribution(mechanisms, target_curve, ref_point=None, constraints=[0.75, 10.0]):
-    """Plot the distribution of initial random mechanisms."""
-    tools = Tools(device='cpu')
+def analyze_initial_population(mechanisms, target_curve, device='cuda'):
+    """Analyze the initial random population before optimization - GPU optimized."""
+    print("\n=== Initial Population Analysis (GPU) ===")
+
+    tools = Tools(device=device)
     tools.compile()
 
     distances = []
     materials = []
 
-    for mech in tqdm(mechanisms, desc="Analyzing initial population"):
-        try:
-            distance, material = tools(
-                mech['x0'],
-                mech['edges'],
-                mech['fixed_joints'],
-                mech['motor'],
-                target_curve,
-                target_idx=mech.get('target_joint', mech['x0'].shape[0] - 1)
-            )
-            distances.append(distance)
-            materials.append(material)
-        except:
-            continue
-
-    if not distances:
-        print("No mechanisms to plot in initial distribution.")
-        return
-
-    if ref_point is None:
-        ref_point = np.array(constraints)
-
-    plt.figure(figsize=(12, 5))
-
-    # Scatter plot of feasible mechanisms
-    plt.subplot(1, 2, 1)
-    plt.scatter(distances, materials, alpha=0.6, s=30, c='blue', label='Feasible mechanisms')
-    plt.axvline(x=ref_point[0], color='red', linestyle='--', alpha=0.7, label=f'Distance constraint ({ref_point[0]})')
-    plt.axhline(y=ref_point[1], color='red', linestyle='--', alpha=0.7, label=f'Material constraint ({ref_point[1]})')
-    plt.xlabel('Distance')
-    plt.ylabel('Material')
-    plt.title(f'Initial Feasible Mechanisms Distribution\n({len(distances)} mechanisms)')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-
-    # Histograms
-    plt.subplot(2, 2, 2)
-    plt.hist(distances, bins=20, alpha=0.7, color='blue', edgecolor='black')
-    plt.axvline(x=ref_point[0], color='red', linestyle='--', alpha=0.7)
-    plt.xlabel('Distance')
-    plt.ylabel('Count')
-    plt.title('Distance Distribution')
-    plt.grid(True, alpha=0.3)
-
-    plt.subplot(2, 2, 4)
-    plt.hist(materials, bins=20, alpha=0.7, color='green', edgecolor='black')
-    plt.axvline(x=ref_point[1], color='red', linestyle='--', alpha=0.7)
-    plt.xlabel('Material')
-    plt.ylabel('Count')
-    plt.title('Material Distribution')
-    plt.grid(True, alpha=0.3)
-
-    plt.tight_layout()
-    plt.show()
-
-
-def analyze_initial_population(mechanisms, target_curve):
-    """Analyze the initial random population before optimization."""
-    print("\n=== Initial Population Analysis ===")
-
-    tools = Tools(device='cpu')
-    tools.compile()
-
-    distances = []
-    materials = []
-
-    for mech in tqdm(mechanisms, desc="Analyzing initial population"):
+    for mech in tqdm(mechanisms, desc="GPU analyzing initial population"):
         try:
             distance, material = tools(
                 mech['x0'],
@@ -697,88 +638,7 @@ def analyze_initial_population(mechanisms, target_curve):
         print(f"- Material: min={min(materials):.4f}, max={max(materials):.4f}")
 
         # Count feasible vs infeasible
-        feasible_count = sum(1 for d, m in zip(distances, materials) if d <= 6 and m <= 20)
+        feasible_count = sum(1 for d, m in zip(distances, materials) if d <= 0.75 and m <= 10)
         print(f"- Feasible mechanisms: {feasible_count}/{len(distances)} ({100*feasible_count/len(distances):.1f}%)")
 
-        # Plot initial population
-        plt.figure(figsize=(12, 5))
-
-        # Scatter plot
-        plt.subplot(1, 2, 1)
-        feasible_mask = [(d <= 6 and m <= 20) for d, m in zip(distances, materials)]
-        infeasible_mask = [not mask for mask in feasible_mask]
-
-        if sum(feasible_mask) > 0:
-            feasible_d = [d for d, mask in zip(distances, feasible_mask) if mask]
-            feasible_m = [m for m, mask in zip(materials, feasible_mask) if mask]
-            plt.scatter(feasible_d, feasible_m, alpha=0.6, s=20, c='green', label=f'Feasible ({sum(feasible_mask)})')
-
-        if sum(infeasible_mask) > 0:
-            infeasible_d = [d for d, mask in zip(distances, infeasible_mask) if mask]
-            infeasible_m = [m for m, mask in zip(materials, infeasible_mask) if mask]
-            plt.scatter(infeasible_d, infeasible_m, alpha=0.3, s=20, c='red', label=f'Infeasible ({sum(infeasible_mask)})')
-
-        plt.axvline(x=6, color='red', linestyle='--', label='Distance constraint (6)')
-        plt.axhline(y=20.0, color='red', linestyle='--', label='Material constraint (20)')
-        plt.xlabel('Distance')
-        plt.ylabel('Material')
-        plt.title('Initial Random Population')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-
-        # Histogram of distances
-        plt.subplot(2, 2, 2)
-        plt.hist(distances, bins=30, alpha=0.7, color='blue', edgecolor='black')
-        plt.axvline(x=6, color='red', linestyle='--', alpha=0.7)
-        plt.xlabel('Distance')
-        plt.ylabel('Count')
-        plt.title('Distance Distribution')
-        plt.grid(True, alpha=0.3)
-
-        # Histogram of materials
-        plt.subplot(2, 2, 4)
-        plt.hist(materials, bins=30, alpha=0.7, color='orange', edgecolor='black')
-        plt.axvline(x=20, color='red', linestyle='--', alpha=0.7)
-        plt.xlabel('Material')
-        plt.ylabel('Count')
-        plt.title('Material Distribution')
-        plt.grid(True, alpha=0.3)
-
-        plt.tight_layout()
-        plt.show()
-
-    return distances, materials
-
-def analyze_initial_population(mechanisms, target_curve):
-    """Analyze the initial random population before optimization."""
-    print("\n=== Initial Population Analysis ===")
-
-    from LINKS.Optimization import Tools
-    tools = Tools(device='cpu')
-    tools.compile()
-
-    distances = []
-    materials = []
-
-    for mech in mechanisms:
-        try:
-            distance, material = tools(
-                mech['x0'],
-                mech['edges'],
-                mech['fixed_joints'],
-                mech['motor'],
-                target_curve,
-                target_idx=mech.get('target_joint', mech['x0'].shape[0] - 1)
-            )
-            distances.append(distance)
-            materials.append(material)
-        except:
-            continue
-
-    if distances:
-        print(f"Initial population statistics:")
-        print(f"- Distance: mean={np.mean(distances):.4f}, std={np.std(distances):.4f}")
-        print(f"- Distance: min={min(distances):.4f}, max={max(distances):.4f}")
-        print(f"- Material: mean={np.mean(materials):.4f}, std={np.std(materials):.4f}")
-        print(f"- Material: min={min(materials):.4f}, max={max(materials):.4f}")
     return distances, materials

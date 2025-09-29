@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Multi-Node Recursive Single Curve Optimization Script
+Multi-Node Recursive Single Curve Optimization Script - GPU Version
 
 This script runs the recursive optimization approach across different node configurations
 (5, 6, 7 nodes) and combines all Pareto fronts into a single visualization.
+Optimized for NVIDIA GPU acceleration on Windows.
 
 For each node configuration:
 1. Sample 4000 mechanisms, filter at (3,12), plot initial distribution at (0.75,10)
@@ -19,13 +20,12 @@ For each node configuration:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import (
-    setup_environment,
+from utils_gpu import (
+    setup_environment_gpu,
     load_target_curves,
     filter_feasible_mechanisms,
     run_nsga2_optimization,
     analyze_initial_population,
-    plot_initial_distribution,
     AdvancedMechanismOptimizer
 )
 from LINKS.Optimization import MechanismRandomizer
@@ -33,13 +33,14 @@ from pymoo.indicators.hv import HV
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
 
-def extract_pareto_frontier(all_mechanisms, target_curve):
+def extract_pareto_frontier(all_mechanisms, target_curve, device='cuda'):
     """
-    Extract the Pareto frontier mechanisms from a combined set.
+    Extract the Pareto frontier mechanisms from a combined set - GPU optimized.
 
     Args:
         all_mechanisms: List of mechanism dictionaries
         target_curve: Target curve for evaluation
+        device: Device to use for computation
 
     Returns:
         List of Pareto frontier mechanisms
@@ -48,7 +49,7 @@ def extract_pareto_frontier(all_mechanisms, target_curve):
         return []
 
     # Evaluate all mechanisms
-    optimizer = AdvancedMechanismOptimizer()
+    optimizer = AdvancedMechanismOptimizer(device=device)
 
     # Convert mechanisms to evaluation format
     x0s, edges, fixed_joints, motors, target_idxs = [], [], [], [], []
@@ -60,7 +61,7 @@ def extract_pareto_frontier(all_mechanisms, target_curve):
         target_idxs.append(mech.get('target_joint', mech['x0'].shape[0] - 1))
 
     try:
-        # Evaluate all mechanisms
+        # Evaluate all mechanisms on GPU
         distances, materials = optimizer.tools(x0s, edges, fixed_joints, motors, target_curve, target_idxs)
         F = np.column_stack([distances, materials])
 
@@ -82,20 +83,20 @@ def extract_pareto_frontier(all_mechanisms, target_curve):
             global_pareto_indices = feasible_indices[pareto_indices]
             pareto_mechanisms = [all_mechanisms[i] for i in global_pareto_indices]
 
-            print(f"Extracted {len(pareto_mechanisms)} Pareto frontier mechanisms from {len(all_mechanisms)} total")
+            print(f"GPU extracted {len(pareto_mechanisms)} Pareto frontier mechanisms from {len(all_mechanisms)} total")
             return pareto_mechanisms
         else:
             return all_mechanisms[:min(50, len(all_mechanisms))]
 
     except Exception as e:
-        print(f"Error in Pareto frontier extraction: {e}")
+        print(f"Error in GPU Pareto frontier extraction: {e}")
         return all_mechanisms[:min(50, len(all_mechanisms))]
 
 
 def apply_material_only_gradient_optimization(ga_results, problem, target_curve, optimizer,
                                             step_size=2e-5, n_steps=500):
     """
-    Apply gradient-based optimization that only optimizes for material (not distance).
+    Apply gradient-based optimization that only optimizes for material (not distance) - GPU optimized.
     """
     if ga_results.X is None:
         return None, None
@@ -161,7 +162,7 @@ def apply_material_only_gradient_optimization(ga_results, problem, target_curve,
 def apply_distance_only_gradient_optimization(ga_results, problem, target_curve, optimizer,
                                             step_size=2e-5, n_steps=500):
     """
-    Apply gradient-based optimization that only optimizes for distance (not material).
+    Apply gradient-based optimization that only optimizes for distance (not material) - GPU optimized.
     """
     if ga_results.X is None:
         return None, None
@@ -285,9 +286,10 @@ def mechanisms_from_gradient_results(grad_results, original_mechs):
 def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4000,
                                      num_iterations=5, pop_size=200, n_gen=100,
                                      step_sizes_material=[2e-4, 1e-4, 5e-5, 2e-5, 1e-5],
-                                     step_sizes_distance=[2e-4, 1e-4, 5e-5, 2e-5, 1e-5]):
+                                     step_sizes_distance=[2e-4, 1e-4, 5e-5, 2e-5, 1e-5],
+                                     device='cuda'):
     """
-    Run recursive optimization for a single node configuration.
+    Run recursive optimization for a single node configuration - GPU optimized.
 
     Args:
         target_curve: Target curve to optimize for
@@ -298,27 +300,29 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         n_gen: Number of generations for GA
         step_sizes_material: Array of step sizes for material gradient descent
         step_sizes_distance: Array of step sizes for distance gradient descent
+        device: Device to use for computation
 
     Returns:
         List of hypervolumes for each iteration, final Pareto frontier F values
     """
 
     print(f"\n{'='*70}")
-    print(f"RECURSIVE OPTIMIZATION FOR {num_nodes} NODES")
+    print(f"GPU RECURSIVE OPTIMIZATION FOR {num_nodes} NODES")
     print(f"{'='*70}")
     print(f"Target: Curve 2 (index 1)")
     print(f"Initial mechanisms: {num_mechanisms}")
     print(f"Iterations: {num_iterations}")
+    print(f"Device: {device.upper()}")
     print(f"Material step sizes: {step_sizes_material}")
     print(f"Distance step sizes: {step_sizes_distance}")
 
     # Step 1: Initial sampling and filtering
-    print(f"\n1. Generating {num_mechanisms} initial mechanisms...")
+    print(f"\n1. Generating {num_mechanisms} initial mechanisms on GPU...")
 
     randomizer = MechanismRandomizer(
         min_size=num_nodes,
         max_size=num_nodes,
-        device='cpu'
+        device=device
     )
 
     mechanisms = []
@@ -332,15 +336,16 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
     print(f"Successfully generated {len(mechanisms)} mechanisms")
 
     # Analyze initial population
-    print("\n2. Analyzing initial population...")
-    analyze_initial_population(mechanisms, target_curve)
+    print("\n2. Analyzing initial population on GPU...")
+    analyze_initial_population(mechanisms, target_curve, device=device)
 
     # Filter at (3, 12)
-    print("\n3. Filtering mechanisms at (3, 12)...")
+    print("\n3. Filtering mechanisms at (3, 12) on GPU...")
     feasible_mechanisms, performance_metrics = filter_feasible_mechanisms(
         mechanisms,
         target_curve,
-        feasibility_threshold=(3, 12.0)
+        feasibility_threshold=(3, 12.0),
+        device=device
     )
 
     print(f"Feasible mechanisms: {len(feasible_mechanisms)}/{len(mechanisms)} "
@@ -354,7 +359,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
     current_mechanisms = feasible_mechanisms
     hypervolumes = []
     all_iteration_results = []
-    optimizer = AdvancedMechanismOptimizer()
+    optimizer = AdvancedMechanismOptimizer(device=device)
     hv_indicator = HV(np.array([0.75, 10.0]))
 
     # Track all mechanisms from all previous iterations
@@ -363,16 +368,16 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
     # Recursive optimization iterations
     for iteration in range(num_iterations):
         print(f"\n{'='*60}")
-        print(f"ITERATION {iteration + 1}/{num_iterations} ({num_nodes} nodes)")
+        print(f"GPU ITERATION {iteration + 1}/{num_iterations} ({num_nodes} nodes)")
         print(f"{'='*60}")
 
         # Step (-1): From iteration 2 onwards, use Pareto frontier of all previous mechanisms
         if iteration >= 1:  # Starting from iteration 2 (iteration index 1)
-            print(f"\n(-1) Extracting Pareto frontier from all previous iterations...")
+            print(f"\n(-1) Extracting Pareto frontier from all previous iterations on GPU...")
             print(f"Total accumulated mechanisms from previous iterations: {len(all_previous_mechanisms)}")
 
             if len(all_previous_mechanisms) > 0:
-                pareto_mechanisms = extract_pareto_frontier(all_previous_mechanisms, target_curve)
+                pareto_mechanisms = extract_pareto_frontier(all_previous_mechanisms, target_curve, device=device)
                 print(f"Using {len(pareto_mechanisms)} Pareto frontier mechanisms as starting point")
                 current_mechanisms = pareto_mechanisms
             else:
@@ -423,7 +428,8 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         feasible_perturbed, _ = filter_feasible_mechanisms(
             perturbed_mechanisms,
             target_curve,
-            feasibility_threshold=(0.75, 10.0)
+            feasibility_threshold=(0.75, 10.0),
+            device=device
         )
 
         print(f"Feasible perturbed mechanisms: {len(feasible_perturbed)}/{len(perturbed_mechanisms)} "
@@ -433,14 +439,15 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         ga_input_mechanisms = feasible_perturbed if len(feasible_perturbed) >= 10 else current_mechanisms
 
         # Step (1): Run GA on perturbed cluster
-        print(f"\n(1) Running GA on perturbed cluster ({len(ga_input_mechanisms)} mechanisms)...")
+        print(f"\n(1) Running GPU GA on perturbed cluster ({len(ga_input_mechanisms)} mechanisms)...")
         ga_results, ga_problem = run_nsga2_optimization(
             ga_input_mechanisms,
             target_curve,
             N=num_nodes,
             pop_size=min(pop_size, len(ga_input_mechanisms)),
             n_gen=n_gen,
-            verbose=False
+            verbose=False,
+            device=device
         )
 
         if ga_results.X is None:
@@ -450,7 +457,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         ga_mechanisms = mechanisms_from_results(ga_results, ga_problem)
 
         # Step (2): Material-only gradient descent on frontier
-        print(f"\n(2) Applying material-only gradient descent...")
+        print(f"\n(2) Applying GPU material-only gradient descent...")
         material_grad_results, material_original_mechs = apply_material_only_gradient_optimization(
             ga_results, ga_problem, target_curve, optimizer,
             step_size=step_sizes_material[iteration], n_steps=500
@@ -459,7 +466,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         material_mechanisms = mechanisms_from_gradient_results(material_grad_results, material_original_mechs)
 
         # Step (3): Distance-only gradient descent on original frontier
-        print(f"\n(3) Applying distance-only gradient descent...")
+        print(f"\n(3) Applying GPU distance-only gradient descent...")
         distance_grad_results, distance_original_mechs = apply_distance_only_gradient_optimization(
             ga_results, ga_problem, target_curve, optimizer,
             step_size=step_sizes_distance[iteration], n_steps=500
@@ -481,7 +488,8 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
         final_feasible, final_metrics = filter_feasible_mechanisms(
             valid_combined,
             target_curve,
-            feasibility_threshold=(0.75, 10.0)
+            feasibility_threshold=(0.75, 10.0),
+            device=device
         )
 
         if len(final_feasible) == 0:
@@ -503,7 +511,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
             'num_solutions': len(F)
         })
 
-        print(f"\nIteration {iteration + 1} Results:")
+        print(f"\nGPU Iteration {iteration + 1} Results:")
         print(f"- GA solutions: {len(ga_mechanisms)}")
         print(f"- Material gradient solutions: {len(material_mechanisms)}")
         print(f"- Distance gradient solutions: {len(distance_mechanisms)}")
@@ -527,7 +535,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
 
     # Extract final Pareto frontier for this node configuration
     if len(all_iteration_results) > 0:
-        print(f"\nExtracting final Pareto frontier for {num_nodes} nodes...")
+        print(f"\nExtracting final Pareto frontier for {num_nodes} nodes on GPU...")
 
         # Collect all F values from all iterations
         all_F_values = []
@@ -542,7 +550,7 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
             if len(fronts) > 0:
                 pareto_indices = fronts[0]
                 final_pareto_F = all_F_array[pareto_indices]
-                print(f"Final Pareto frontier for {num_nodes} nodes: {len(final_pareto_F)} solutions")
+                print(f"Final GPU Pareto frontier for {num_nodes} nodes: {len(final_pareto_F)} solutions")
                 return hypervolumes, final_pareto_F
 
     return hypervolumes, None
@@ -550,14 +558,15 @@ def recursive_optimization_single_node(target_curve, num_nodes, num_mechanisms=4
 
 def multi_node_recursive_optimization():
     """
-    Run recursive optimization across multiple node configurations and combine results.
+    Run recursive optimization across multiple node configurations and combine results - GPU optimized.
     """
-    print("=== MULTI-NODE RECURSIVE OPTIMIZATION ===")
+    print("=== MULTI-NODE RECURSIVE GPU OPTIMIZATION ===")
     print("Running optimization for 7, 8, and 9 nodes (3 runs each = 9 total epochs)")
+    print("Optimized for NVIDIA GPU on Windows")
     print("="*50)
 
-    # Setup environment
-    setup_environment()
+    # Setup GPU environment
+    setup_environment_gpu()
 
     # Load target curves
     target_curves = load_target_curves()
@@ -581,7 +590,7 @@ def multi_node_recursive_optimization():
 
         for run_idx in range(num_runs_per_config):
             print(f"\n\n{'#'*80}")
-            print(f"STARTING OPTIMIZATION FOR {num_nodes} NODES - RUN {run_idx + 1}/{num_runs_per_config}")
+            print(f"STARTING GPU OPTIMIZATION FOR {num_nodes} NODES - RUN {run_idx + 1}/{num_runs_per_config}")
             print(f"{'#'*80}")
 
             hypervolumes, final_pareto_F = recursive_optimization_single_node(
@@ -592,7 +601,8 @@ def multi_node_recursive_optimization():
                 pop_size=100,
                 n_gen=200,
                 step_sizes_material=step_sizes_material,
-                step_sizes_distance=step_sizes_distance
+                step_sizes_distance=step_sizes_distance,
+                device='cuda'
             )
 
             run_result = {
@@ -608,7 +618,7 @@ def multi_node_recursive_optimization():
             node_results.append(run_result)
             all_epochs.append(run_result)
 
-            print(f"Completed {num_nodes} nodes, run {run_idx + 1}")
+            print(f"Completed GPU optimization for {num_nodes} nodes, run {run_idx + 1}")
             if final_pareto_F is not None:
                 print(f"  - Pareto front size: {len(final_pareto_F)}")
                 print(f"  - Best distance: {min(final_pareto_F[:, 0]):.6f}")
@@ -616,32 +626,24 @@ def multi_node_recursive_optimization():
 
         all_results[num_nodes] = node_results
 
-        print(f"\nCompleted optimization for {num_nodes} nodes")
-        if final_pareto_F is not None:
-            print(f"Final Pareto frontier: {len(final_pareto_F)} solutions")
-            print(f"Best distance: {min(final_pareto_F[:, 0]):.4f}")
-            print(f"Best material: {min(final_pareto_F[:, 1]):.4f}")
-        else:
-            print("No final Pareto frontier found")
+        print(f"\nCompleted GPU optimization for {num_nodes} nodes")
 
     # Create comprehensive visualization
     print(f"\n{'='*80}")
-    print("CREATING COMPREHENSIVE VISUALIZATION - 9 EPOCHS")
+    print("CREATING COMPREHENSIVE VISUALIZATION - 9 GPU EPOCHS")
     print(f"{'='*80}")
 
     hv_indicator = HV(np.array([0.75, 10.0]))
 
     # (1) FINAL COMBINED PLOT - All 9 epochs
-    print("Creating Plot 1: Final combined plot with all 9 epochs...")
+    print("Creating Plot 1: Final combined plot with all 9 GPU epochs...")
     plt.figure(figsize=(14, 10))
 
     all_distances = []
     all_materials = []
 
     # Define colors and markers for each run
-    run_colors = {5: ['lightblue', 'blue', 'darkblue'],
-                  6: ['lightgreen', 'green', 'darkgreen'],
-                  7: ['lightcoral', 'red', 'darkred'],
+    run_colors = {7: ['lightblue', 'blue', 'darkblue'],
                   8: ['lightgreen', 'green', 'darkgreen'],
                   9: ['lightcoral', 'red', 'darkred']}
     run_markers = ['o', 's', '^']
@@ -682,9 +684,9 @@ def multi_node_recursive_optimization():
             combined_pareto_indices = fronts[0]
             combined_pareto_F = combined_F[combined_pareto_indices]
             combined_pareto_hv = hv_indicator(combined_pareto_F)
-            title_text = f'All 9 Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f} | Pareto HV: {combined_pareto_hv:.3f} ({len(combined_pareto_F)} frontier pts)'
+            title_text = f'All 9 GPU Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f} | Pareto HV: {combined_pareto_hv:.3f} ({len(combined_pareto_F)} frontier pts)'
         else:
-            title_text = f'All 9 Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f}'
+            title_text = f'All 9 GPU Epochs: 7, 8, 9 Node Configurations (3 runs each)\nCombined HV: {combined_hv:.3f}'
 
     plt.xlabel('Distance', fontsize=12)
     plt.ylabel('Material', fontsize=12)
@@ -699,223 +701,42 @@ def multi_node_recursive_optimization():
     plt.tight_layout()
     plt.show()
 
-    # (2) 3×3 GRID PLOTS - Individual results
-    print("Creating Plot 2: 3×3 grid showing individual epoch results...")
-    fig, axes = plt.subplots(3, 3, figsize=(18, 15))
-
-    for i, epoch in enumerate(all_epochs):
-        row = i // 3
-        col = i % 3
-        ax = axes[row, col]
-
-        if epoch['pareto_front'] is not None:
-            F = epoch['pareto_front']
-            distances = F[:, 0]
-            materials = F[:, 1]
-
-            # Calculate HV for this epoch
-            hv_value = hv_indicator(F) if len(F) > 0 else 0
-
-            ax.scatter(distances, materials,
-                      alpha=0.7, s=30,
-                      c=epoch['color'],
-                      marker=epoch['marker'],
-                      edgecolors='black',
-                      linewidth=0.5)
-
-            ax.axvline(x=0.75, color='red', linestyle='--', alpha=0.7, linewidth=2)
-            ax.axhline(y=10.0, color='red', linestyle='--', alpha=0.7, linewidth=2)
-            ax.set_xlabel('Distance', fontsize=10)
-            ax.set_ylabel('Material', fontsize=10)
-            ax.set_title(f'{epoch["num_nodes"]} nodes, Run {epoch["run_id"]}\n{len(F)} pts, HV: {hv_value:.3f}', fontsize=10)
-            ax.grid(True, alpha=0.3)
-
-            if all_distances and all_materials:
-                ax.set_xlim(0, min(max(all_distances) * 1.1, 1.0))
-                ax.set_ylim(0, min(max(all_materials) * 1.1, 12.0))
-
-    plt.suptitle('Individual Epoch Results: 3×3 Grid (9 Total Runs)', fontsize=16, fontweight='bold')
-    plt.tight_layout()
-    plt.show()
-
-    # (3) AVERAGED HV GROWTH CURVES
-    print("Creating Plot 3: Averaged HV growth curves for 7, 8, 9 nodes...")
-    plt.figure(figsize=(12, 8))
-
-    for num_nodes in node_configurations:
-        node_runs = all_results[num_nodes]
-
-        # Collect hypervolume curves for this node configuration
-        hv_curves = []
-        for run_result in node_runs:
-            if run_result['hypervolumes']:
-                hv_curves.append(run_result['hypervolumes'])
-
-        if hv_curves:
-            # Find minimum length to ensure all curves have same length
-            min_length = min(len(curve) for curve in hv_curves)
-            hv_array = np.array([curve[:min_length] for curve in hv_curves])
-
-            # Calculate mean and std
-            hv_mean = np.mean(hv_array, axis=0)
-            hv_std = np.std(hv_array, axis=0)
-
-            iterations = range(1, len(hv_mean) + 1)
-
-            # Plot mean curve with std band
-            color_map = {7: 'blue', 8: 'green', 9: 'red'}
-            color = color_map[num_nodes]
-
-            plt.plot(iterations, hv_mean,
-                    color=color, linewidth=3,
-                    marker='o', markersize=6,
-                    label=f'{num_nodes} nodes (avg of 3 runs)')
-
-            plt.fill_between(iterations,
-                           hv_mean - hv_std, hv_mean + hv_std,
-                           color=color, alpha=0.2)
-
-            # Plot individual runs as thin lines
-            for i, curve in enumerate(hv_curves):
-                plt.plot(range(1, len(curve[:min_length]) + 1), curve[:min_length],
-                        color=color, alpha=0.4, linewidth=1, linestyle='--')
-
-    plt.xlabel('Iteration', fontsize=12)
-    plt.ylabel('Hypervolume', fontsize=12)
-    plt.title('Hypervolume Evolution: Averaged Across 3 Runs Per Node Configuration', fontsize=14, fontweight='bold')
-    plt.legend(fontsize=12)
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
-
-    # (4) HV PLOT WITH FRONTIER HIGHLIGHTED
-    print("Creating Plot 4: HV comparison with frontier solutions highlighted...")
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-
-    # Left plot: Final HV values for each epoch
-    hv_values = []
-    epoch_labels = []
-    colors_list = []
-
-    for epoch in all_epochs:
-        if epoch['pareto_front'] is not None:
-            hv_val = hv_indicator(epoch['pareto_front'])
-            hv_values.append(hv_val)
-            epoch_labels.append(f"{epoch['num_nodes']}n R{epoch['run_id']}")
-            colors_list.append(epoch['color'])
-
-    bars = ax1.bar(range(len(hv_values)), hv_values, color=colors_list, alpha=0.7, edgecolor='black')
-
-    # Highlight the best performing epoch
-    if hv_values:
-        best_idx = np.argmax(hv_values)
-        bars[best_idx].set_color('gold')
-        bars[best_idx].set_edgecolor('red')
-        bars[best_idx].set_linewidth(3)
-
-    ax1.set_xlabel('Epoch', fontsize=12)
-    ax1.set_ylabel('Final Hypervolume', fontsize=12)
-    ax1.set_title('Final Hypervolume by Epoch\n(Gold bar = Best frontier)', fontsize=12, fontweight='bold')
-    ax1.set_xticks(range(len(epoch_labels)))
-    ax1.set_xticklabels(epoch_labels, rotation=45)
-    ax1.grid(True, alpha=0.3, axis='y')
-
-    # Right plot: Pareto front of the best performing epoch
-    if hv_values:
-        best_epoch = all_epochs[best_idx]
-        if best_epoch['pareto_front'] is not None:
-            F_best = best_epoch['pareto_front']
-
-            # Plot all other epochs in background
-            for i, epoch in enumerate(all_epochs):
-                if i != best_idx and epoch['pareto_front'] is not None:
-                    F = epoch['pareto_front']
-                    ax2.scatter(F[:, 0], F[:, 1],
-                              alpha=0.2, s=20, c='lightgray',
-                              edgecolors='none')
-
-            # Plot best epoch prominently
-            ax2.scatter(F_best[:, 0], F_best[:, 1],
-                       alpha=0.8, s=60, c='gold',
-                       edgecolors='red', linewidth=2,
-                       label=f'Best: {best_epoch["epoch_id"]}')
-
-            ax2.axvline(x=0.75, color='red', linestyle='--', alpha=0.8, linewidth=2)
-            ax2.axhline(y=10.0, color='red', linestyle='--', alpha=0.8, linewidth=2)
-            ax2.set_xlabel('Distance', fontsize=12)
-            ax2.set_ylabel('Material', fontsize=12)
-            ax2.set_title(f'Best Performing Pareto Front\nHV: {hv_values[best_idx]:.3f}', fontsize=12, fontweight='bold')
-            ax2.legend()
-            ax2.grid(True, alpha=0.3)
-
-            if all_distances and all_materials:
-                ax2.set_xlim(0, min(max(all_distances) * 1.1, 1.0))
-                ax2.set_ylim(0, min(max(all_materials) * 1.1, 12.0))
-
-    plt.tight_layout()
-    plt.show()
-
-    # Print summary statistics
-    print(f"\n{'='*80}")
-    print("SUMMARY STATISTICS")
-    print(f"{'='*80}")
-
-    for num_nodes, results in all_results.items():
-        print(f"\n{num_nodes} Nodes:")
-        if results['pareto_front'] is not None:
-            F = results['pareto_front']
-            distances = F[:, 0]
-            materials = F[:, 1]
-
-            print(f"  - Pareto front size: {len(F)} solutions")
-            print(f"  - Best distance: {min(distances):.4f}")
-            print(f"  - Best material: {min(materials):.4f}")
-            print(f"  - Distance range: {min(distances):.4f} - {max(distances):.4f}")
-            print(f"  - Material range: {min(materials):.4f} - {max(materials):.4f}")
-
-            if len(results['hypervolumes']) > 0:
-                print(f"  - Final hypervolume: {results['hypervolumes'][-1]:.4f}")
-                if len(results['hypervolumes']) > 1:
-                    improvement = results['hypervolumes'][-1] - results['hypervolumes'][0]
-                    print(f"  - Hypervolume improvement: {improvement:.4f}")
-        else:
-            print(f"  - No solutions found")
-
     # Save results in submittable format
     print(f"\n{'='*80}")
-    print("SAVING RESULTS FOR SUBMISSION")
+    print("SAVING GPU RESULTS FOR SUBMISSION")
     print(f"{'='*80}")
 
     # Collect all final mechanisms from both configurations
     all_final_mechanisms = []
 
-    for num_nodes, results in all_results.items():
-        if results['pareto_front'] is not None:
-            F = results['pareto_front']
-            print(f"\n{num_nodes} nodes: {len(F)} Pareto optimal solutions")
+    for config_idx, num_nodes in enumerate(node_configurations):
+        node_results = all_results[num_nodes]
+        for run_result in node_results:
+            if run_result['pareto_front'] is not None:
+                F = run_result['pareto_front']
+                print(f"\n{num_nodes} nodes, run {run_result['run_id']}: {len(F)} Pareto optimal solutions")
 
-            # For submission, we need mechanism representations, not just F values
-            # Since we only have F values from the final Pareto front,
-            # we'll save those and note the configuration
-            for i, f_vals in enumerate(F):
-                mechanism_data = {
-                    'distance': float(f_vals[0]),
-                    'material': float(f_vals[1]),
-                    'nodes': int(num_nodes),
-                    'mechanism_id': f"{num_nodes}nodes_{i:03d}"
-                }
-                all_final_mechanisms.append(mechanism_data)
+                # For submission, we need mechanism representations, not just F values
+                for i, f_vals in enumerate(F):
+                    mechanism_data = {
+                        'distance': float(f_vals[0]),
+                        'material': float(f_vals[1]),
+                        'nodes': int(num_nodes),
+                        'run_id': run_result['run_id'],
+                        'mechanism_id': f"{num_nodes}nodes_run{run_result['run_id']}_{i:03d}"
+                    }
+                    all_final_mechanisms.append(mechanism_data)
 
     # Sort by distance (best first)
     all_final_mechanisms.sort(key=lambda x: x['distance'])
 
-    print(f"\nTotal mechanisms for submission: {len(all_final_mechanisms)}")
+    print(f"\nTotal GPU mechanisms for submission: {len(all_final_mechanisms)}")
     print(f"Best distance: {all_final_mechanisms[0]['distance']:.6f}")
     print(f"Best material: {min(m['material'] for m in all_final_mechanisms):.4f}")
 
     # Save as JSON for analysis
     import json
-    with open('curve2_submission_results.json', 'w') as f:
+    with open('curve2_submission_results_gpu.json', 'w') as f:
         json.dump(all_final_mechanisms, f, indent=2)
 
     # Save distances and materials as numpy arrays for direct submission
@@ -926,23 +747,23 @@ def multi_node_recursive_optimization():
     submission_array = np.column_stack([distances, materials])
 
     # Save as .npy file for submission
-    np.save('curve2_submission_pareto_front.npy', submission_array)
+    np.save('curve2_submission_pareto_front_gpu.npy', submission_array)
 
-    print(f"\nSaved results:")
-    print(f"- curve2_submission_results.json (detailed results)")
-    print(f"- curve2_submission_pareto_front.npy (submission array shape: {submission_array.shape})")
+    print(f"\nSaved GPU results:")
+    print(f"- curve2_submission_results_gpu.json (detailed results)")
+    print(f"- curve2_submission_pareto_front_gpu.npy (submission array shape: {submission_array.shape})")
 
     # Display top 10 solutions
-    print(f"\nTop 10 solutions:")
-    print(f"{'Rank':<4} {'Distance':<10} {'Material':<10} {'Nodes':<6} {'ID'}")
-    print("-" * 50)
+    print(f"\nTop 10 GPU solutions:")
+    print(f"{'Rank':<4} {'Distance':<10} {'Material':<10} {'Nodes':<6} {'Run':<4} {'ID'}")
+    print("-" * 60)
     for i in range(min(10, len(all_final_mechanisms))):
         m = all_final_mechanisms[i]
-        print(f"{i+1:<4} {m['distance']:<10.6f} {m['material']:<10.4f} {m['nodes']:<6} {m['mechanism_id']}")
+        print(f"{i+1:<4} {m['distance']:<10.6f} {m['material']:<10.4f} {m['nodes']:<6} {m['run_id']:<4} {m['mechanism_id']}")
 
     return all_results
 
 
 if __name__ == "__main__":
     results = multi_node_recursive_optimization()
-    print("\n=== Multi-Node Recursive Optimization Complete! ===")
+    print("\n=== Multi-Node Recursive GPU Optimization Complete! ===")
