@@ -560,8 +560,9 @@ def run_nsga2_optimization(mechanisms, target_curve, N=7, pop_size=100, n_gen=10
     algorithm = NSGA2(
         pop_size=pop_size,
         sampling=SampleFromFeasible(),
-        mating=MixedVariableMating(eliminate_duplicates=MixedVariableDuplicateElimination()),
-        mutation=PolynomialMutation(prob=0.5),
+        crossover=SBX(prob=1.5, eta=5.0),
+        #mating=MixedVariableMating(eliminate_duplicates=MixedVariableDuplicateElimination()),
+        mutation=PolynomialMutation(eta=3.5,prob=1.0),
         eliminate_duplicates=MixedVariableDuplicateElimination()
     )
 

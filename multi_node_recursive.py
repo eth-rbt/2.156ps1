@@ -564,10 +564,10 @@ def multi_node_recursive_optimization():
     target_curve = target_curves[1]  # Curve 2 (index 1)
 
     # Define step sizes for each iteration (adjustable) - 16 iterations
-    step_sizes_material = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5, 1e-5, 1e-5, 8e-6, 8e-6, 5e-6, 2e-6]
-    step_sizes_distance = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5, 1e-5, 1e-5, 8e-6, 8e-6, 5e-6, 2e-6]
+    step_sizes_material = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5]
+    step_sizes_distance = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 2e-5, 2e-5]
 
-    node_configurations = [7, 8, 9]
+    node_configurations = [5, 8, 9]
     num_runs_per_config = 3
     colors = ['blue', 'green', 'red']
     markers = ['o', 's', '^']
@@ -587,10 +587,10 @@ def multi_node_recursive_optimization():
             hypervolumes, final_pareto_F = recursive_optimization_single_node(
                 target_curve,
                 num_nodes=num_nodes,
-                num_mechanisms=12000,
-                num_iterations=16,
-                pop_size=200,
-                n_gen=100,
+                num_mechanisms=8000,
+                num_iterations=10,
+                pop_size=100,
+                n_gen=200,
                 step_sizes_material=step_sizes_material,
                 step_sizes_distance=step_sizes_distance
             )
