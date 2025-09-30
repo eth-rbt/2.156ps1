@@ -715,13 +715,13 @@ def multi_node_recursive_optimization():
                                     'nodes': int(num_nodes),
                                     'iteration_id': iteration_id,
                                     'mechanism_id': f"C{curve_id}_{num_nodes}n_I{iteration_id}_{i:03d}",
-                                    # Include actual mechanism data
+                                    # Include actual mechanism data (convert numpy types for JSON)
                                     'x0': mech['x0'].tolist() if hasattr(mech['x0'], 'tolist') else mech['x0'],
                                     'edges': mech['edges'].tolist() if hasattr(mech['edges'], 'tolist') else mech['edges'],
                                     'fixed_joints': mech['fixed_joints'].tolist() if hasattr(mech['fixed_joints'], 'tolist') else mech['fixed_joints'],
                                     'motor': mech['motor'].tolist() if hasattr(mech['motor'], 'tolist') else mech['motor'],
-                                    'target_joint': mech.get('target_joint',
-                                        mech['x0'].shape[0] - 1 if hasattr(mech['x0'], 'shape') else len(mech['x0']) - 1)
+                                    'target_joint': int(mech.get('target_joint',
+                                        mech['x0'].shape[0] - 1 if hasattr(mech['x0'], 'shape') else len(mech['x0']) - 1))
                                 }
                                 all_final_mechanisms.append(mechanism_data)
                     else:
@@ -767,19 +767,21 @@ def multi_node_recursive_optimization():
         curve_id = int(curve_key.split('_')[1])  # Extract curve number from 'curve_X'
         problem_key = f'Problem {curve_id}'
 
-        # Collect all mechanisms for this curve using actual mechanism data
-        print(f"✅ Processing {problem_key} with actual mechanism data")
+        # Collect all mechanisms for this curve from all nodes/iterations
+        print(f"✅ Processing {problem_key} - collecting from all nodes/iterations")
 
-        curve_mechanisms = []
+        all_curve_mechanisms = []
+        all_curve_F_values = []
+
         for num_nodes, node_results in curve_results.items():
             for run in node_results:
                 if run['pareto_front'] is not None and 'final_mechanisms' in run:
                     final_mechanisms = run['final_mechanisms']
                     F = run['pareto_front']
 
-                    print(f"   Using {len(final_mechanisms)} actual mechanisms from {num_nodes} nodes")
+                    print(f"   Found {len(final_mechanisms)} mechanisms from {num_nodes} nodes, iter {run['iteration_id']}")
 
-                    # Use actual mechanism data from the optimization
+                    # Collect mechanisms and their F values
                     for i, mech in enumerate(final_mechanisms):
                         if i < len(F):  # Ensure we have corresponding F values
                             # Convert numpy arrays to lists for JSON serialization
@@ -788,18 +790,128 @@ def multi_node_recursive_optimization():
                                 'edges': mech['edges'].tolist() if hasattr(mech['edges'], 'tolist') else mech['edges'],
                                 'fixed_joints': mech['fixed_joints'].tolist() if hasattr(mech['fixed_joints'], 'tolist') else mech['fixed_joints'],
                                 'motor': mech['motor'].tolist() if hasattr(mech['motor'], 'tolist') else mech['motor'],
-                                'target_joint': mech.get('target_joint',
-                                    mech['x0'].shape[0] - 1 if hasattr(mech['x0'], 'shape') else len(mech['x0']) - 1)
+                                'target_joint': int(mech.get('target_joint',
+                                    mech['x0'].shape[0] - 1 if hasattr(mech['x0'], 'shape') else len(mech['x0']) - 1))  # Convert to int
                             }
-                            curve_mechanisms.append(mechanism_dict)
+                            all_curve_mechanisms.append(mechanism_dict)
+                            all_curve_F_values.append(F[i])
 
-        submission[problem_key] = curve_mechanisms[:1000]  # Limit to first 1000 per curve (LINKS.CP evaluation limit)
+        print(f"   Total collected: {len(all_curve_mechanisms)} mechanisms from all nodes/iterations")
+
+        # Extract Pareto frontier for this curve from ALL collected mechanisms
+        if len(all_curve_mechanisms) > 0:
+            F_array = np.array(all_curve_F_values)
+
+            # Filter for feasible solutions (distance <= 0.75, material <= 10.0)
+            feasible_mask = np.logical_and(F_array[:, 0] <= 0.75, F_array[:, 1] <= 10.0)
+            if np.any(feasible_mask):
+                feasible_indices = np.where(feasible_mask)[0]
+                feasible_F = F_array[feasible_indices]
+
+                # Apply non-dominated sorting to get Pareto frontier
+                nds = NonDominatedSorting()
+                fronts = nds.do(feasible_F)
+
+                if len(fronts) > 0:
+                    pareto_indices = fronts[0]
+                    global_pareto_indices = feasible_indices[pareto_indices]
+                    pareto_mechanisms = [all_curve_mechanisms[i] for i in global_pareto_indices]
+
+                    print(f"   ✅ Extracted {len(pareto_mechanisms)} Pareto frontier mechanisms for {problem_key}")
+                    submission[problem_key] = pareto_mechanisms[:1000]  # Limit to first 1000 (LINKS.CP limit)
+                else:
+                    print(f"   ⚠️ No Pareto front found, using all feasible mechanisms")
+                    feasible_mechanisms = [all_curve_mechanisms[i] for i in feasible_indices]
+                    submission[problem_key] = feasible_mechanisms[:1000]
+            else:
+                print(f"   ⚠️ No feasible mechanisms found, using best available")
+                submission[problem_key] = all_curve_mechanisms[:1000]
+        else:
+            print(f"   ❌ No mechanisms found for {problem_key}")
+            submission[problem_key] = []
         print(f"Added {len(submission[problem_key])} mechanisms to {problem_key}")
 
     # Save as proper submission format
     submission_path = os.path.join(output_dir, 'submission.npy')
     np.save(submission_path, submission)
     print(f"✅ SAVED: {submission_path} (proper 6-curve format)")
+
+    # ============================================================================
+    # PLOT 6 PARETO FRONTIERS FROM SUBMISSION DATA
+    # ============================================================================
+    print(f"\n🎯 PLOTTING 6 PARETO FRONTIERS FROM SUBMISSION DATA")
+
+    # Evaluate all submission mechanisms to get their F values for plotting
+    from LINKS.Optimization import Tools
+    eval_tools = Tools(device='cpu')
+    eval_tools.compile()
+
+    # Create the 6-curve Pareto frontier plot
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    axes = axes.flatten()
+
+    target_curves = load_target_curves()
+
+    for curve_idx in range(6):
+        problem_key = f'Problem {curve_idx + 1}'
+        ax = axes[curve_idx]
+
+        if problem_key in submission and len(submission[problem_key]) > 0:
+            mechanisms = submission[problem_key]
+
+            print(f"   Evaluating {len(mechanisms)} mechanisms for {problem_key}...")
+
+            # Extract mechanism data
+            x0s = [np.array(mech['x0']) for mech in mechanisms]
+            edges = [np.array(mech['edges']) for mech in mechanisms]
+            fixed_joints = [np.array(mech['fixed_joints']) for mech in mechanisms]
+            motors = [np.array(mech['motor']) for mech in mechanisms]
+            target_idxs = [mech['target_joint'] for mech in mechanisms]
+
+            try:
+                # Evaluate mechanisms
+                distances, materials = eval_tools(
+                    x0s, edges, fixed_joints, motors,
+                    target_curves[curve_idx], target_idxs
+                )
+
+                # Plot Pareto frontier
+                ax.scatter(distances, materials, alpha=0.7, s=30, color='blue', label=f'{len(mechanisms)} mechanisms')
+                ax.axvline(x=0.75, color='red', linestyle='--', alpha=0.8, label='Distance constraint')
+                ax.axhline(y=10.0, color='red', linestyle='--', alpha=0.8, label='Material constraint')
+
+                # Calculate hypervolume
+                F = np.column_stack([distances, materials])
+                feasible_mask = np.logical_and(F[:, 0] <= 0.75, F[:, 1] <= 10.0)
+                if np.any(feasible_mask):
+                    hv_indicator = HV(np.array([0.75, 10.0]))
+                    hv = hv_indicator(F[feasible_mask])
+                    ax.set_title(f'{problem_key}\nHV: {hv:.4f} ({np.sum(feasible_mask)} feasible)')
+                else:
+                    ax.set_title(f'{problem_key}\n(No feasible solutions)')
+
+                ax.set_xlabel('Distance')
+                ax.set_ylabel('Material')
+                ax.grid(True, alpha=0.3)
+                ax.legend(fontsize=8)
+
+            except Exception as e:
+                ax.text(0.5, 0.5, f'Error evaluating\n{problem_key}:\n{str(e)}',
+                       transform=ax.transAxes, ha='center', va='center')
+                ax.set_title(f'{problem_key} (Error)')
+        else:
+            ax.text(0.5, 0.5, f'No mechanisms\nfor {problem_key}',
+                   transform=ax.transAxes, ha='center', va='center')
+            ax.set_title(f'{problem_key} (Empty)')
+
+    plt.tight_layout()
+
+    # Save the plot
+    pareto_plot_path = os.path.join(output_dir, 'submission_pareto_frontiers.png')
+    plt.savefig(pareto_plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    print(f"✅ SAVED: {pareto_plot_path} (6-curve Pareto frontiers)")
 
     # Also save analysis data
     json_path = os.path.join(output_dir, 'submission_analysis.json')
