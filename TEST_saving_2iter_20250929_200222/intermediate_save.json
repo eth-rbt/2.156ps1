@@ -1,0 +1,399 @@
+{
+  "completed_runs": 36,
+  "current_curve": 6,
+  "current_node": 9,
+  "current_iteration": 2,
+  "timestamp": "2025-09-29 20:39:53",
+  "all_runs": [
+    {
+      "curve_id": 1,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve1_5nodes_iter1",
+      "hypervolumes": [
+        4.338643998941091,
+        4.741219392922787
+      ],
+      "pareto_front_size": 11
+    },
+    {
+      "curve_id": 1,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve1_5nodes_iter2",
+      "hypervolumes": [
+        4.798231718063807,
+        5.018965964222421
+      ],
+      "pareto_front_size": 12
+    },
+    {
+      "curve_id": 1,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve1_8nodes_iter1",
+      "hypervolumes": [
+        0.18423950695844837,
+        0.3479861153685988
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 1,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve1_8nodes_iter2",
+      "hypervolumes": [
+        0.8548508712251817,
+        0.8818021048697631
+      ],
+      "pareto_front_size": 2
+    },
+    {
+      "curve_id": 1,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve1_9nodes_iter1",
+      "hypervolumes": [
+        0.9946840022331713,
+        1.415206724050364
+      ],
+      "pareto_front_size": 4
+    },
+    {
+      "curve_id": 1,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve1_9nodes_iter2",
+      "hypervolumes": [
+        0.9946840022331713,
+        1.415206724050364
+      ],
+      "pareto_front_size": 4
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve2_5nodes_iter1",
+      "hypervolumes": [
+        3.318940526240688,
+        3.429112689421366
+      ],
+      "pareto_front_size": 8
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve2_5nodes_iter2",
+      "hypervolumes": [
+        2.9210278493915496,
+        3.025151234011048
+      ],
+      "pareto_front_size": 9
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve2_8nodes_iter1",
+      "hypervolumes": [],
+      "pareto_front_size": 0
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve2_8nodes_iter2",
+      "hypervolumes": [],
+      "pareto_front_size": 0
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve2_9nodes_iter1",
+      "hypervolumes": [
+        0.04174693806010055,
+        0.1670056068743122
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 2,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve2_9nodes_iter2",
+      "hypervolumes": [
+        0.5530907825097984,
+        0.8593724210918481
+      ],
+      "pareto_front_size": 2
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve3_5nodes_iter1",
+      "hypervolumes": [
+        3.58760042601898,
+        4.321120753016537
+      ],
+      "pareto_front_size": 8
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve3_5nodes_iter2",
+      "hypervolumes": [
+        3.626416150798754,
+        3.886008793477128
+      ],
+      "pareto_front_size": 12
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve3_8nodes_iter1",
+      "hypervolumes": [
+        1.807688482365279,
+        1.8833087881458823
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve3_8nodes_iter2",
+      "hypervolumes": [
+        0.8775766767075197,
+        1.081447331764025
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve3_9nodes_iter1",
+      "hypervolumes": [
+        0.8016705979650567,
+        1.0548628096096166
+      ],
+      "pareto_front_size": 7
+    },
+    {
+      "curve_id": 3,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve3_9nodes_iter2",
+      "hypervolumes": [
+        0.882441961617701,
+        1.812055976922366
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve4_5nodes_iter1",
+      "hypervolumes": [
+        3.928993546150881,
+        4.32424218490851
+      ],
+      "pareto_front_size": 15
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve4_5nodes_iter2",
+      "hypervolumes": [
+        3.815736486407907,
+        3.9271978486025674
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve4_8nodes_iter1",
+      "hypervolumes": [
+        1.1844284117337622,
+        1.8931399244406748
+      ],
+      "pareto_front_size": 8
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve4_8nodes_iter2",
+      "hypervolumes": [
+        2.6873585111145104,
+        3.3244376536395137
+      ],
+      "pareto_front_size": 3
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve4_9nodes_iter1",
+      "hypervolumes": [
+        1.799410115721983,
+        2.255749973927564
+      ],
+      "pareto_front_size": 7
+    },
+    {
+      "curve_id": 4,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve4_9nodes_iter2",
+      "hypervolumes": [
+        0.16385802998883037,
+        0.24046077957933676
+      ],
+      "pareto_front_size": 6
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve5_5nodes_iter1",
+      "hypervolumes": [
+        3.162170359354313,
+        3.569450777508365
+      ],
+      "pareto_front_size": 11
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve5_5nodes_iter2",
+      "hypervolumes": [
+        3.5381533243908194,
+        3.71832054741245
+      ],
+      "pareto_front_size": 10
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve5_8nodes_iter1",
+      "hypervolumes": [
+        0.3541302824974366,
+        0.979064517996548
+      ],
+      "pareto_front_size": 6
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve5_8nodes_iter2",
+      "hypervolumes": [
+        0.14834206365981117,
+        0.5074938883161053
+      ],
+      "pareto_front_size": 4
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve5_9nodes_iter1",
+      "hypervolumes": [
+        0.1756940504950535,
+        0.5529550064597402
+      ],
+      "pareto_front_size": 3
+    },
+    {
+      "curve_id": 5,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve5_9nodes_iter2",
+      "hypervolumes": [
+        0.1756940504950535,
+        0.5529550064597402
+      ],
+      "pareto_front_size": 3
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 5,
+      "iteration_id": 1,
+      "epoch_id": "curve6_5nodes_iter1",
+      "hypervolumes": [
+        2.8071300097089065,
+        2.99140302141031
+      ],
+      "pareto_front_size": 12
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 5,
+      "iteration_id": 2,
+      "epoch_id": "curve6_5nodes_iter2",
+      "hypervolumes": [
+        2.957116573066507,
+        3.0925246299223375
+      ],
+      "pareto_front_size": 11
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 8,
+      "iteration_id": 1,
+      "epoch_id": "curve6_8nodes_iter1",
+      "hypervolumes": [
+        0.40960155347929117,
+        1.7947292108237036
+      ],
+      "pareto_front_size": 4
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 8,
+      "iteration_id": 2,
+      "epoch_id": "curve6_8nodes_iter2",
+      "hypervolumes": [
+        0.8004165792735307,
+        0.9414302083473558
+      ],
+      "pareto_front_size": 5
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 9,
+      "iteration_id": 1,
+      "epoch_id": "curve6_9nodes_iter1",
+      "hypervolumes": [
+        0.3870476978925126,
+        0.6284646009437154
+      ],
+      "pareto_front_size": 12
+    },
+    {
+      "curve_id": 6,
+      "num_nodes": 9,
+      "iteration_id": 2,
+      "epoch_id": "curve6_9nodes_iter2",
+      "hypervolumes": [
+        0.9706476189026034,
+        1.296534902970805
+      ],
+      "pareto_front_size": 9
+    }
+  ]
+}

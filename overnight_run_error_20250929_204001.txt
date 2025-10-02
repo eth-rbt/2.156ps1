@@ -1,0 +1,9 @@
+Error occurred at: 2025-09-29 20:40:01
+Error: 'run_id'
+Traceback:
+Traceback (most recent call last):
+  File "C:\Users\Ethan\code\2.156ps1\test_saving_2_iterations.py", line 1232, in <module>
+    results = multi_node_recursive_optimization()
+  File "C:\Users\Ethan\code\2.156ps1\test_saving_2_iterations.py", line 1053, in multi_node_recursive_optimization
+    ax.set_title(f'{epoch["num_nodes"]} nodes, Run {epoch["run_id"]}\n{len(F)} pts, HV: {hv_value:.3f}', fontsize=10)
+KeyError: 'run_id'

@@ -589,8 +589,8 @@ def multi_node_recursive_optimization():
     target_curves = load_target_curves()
 
     # Define step sizes for each iteration (12 iterations per run)
-    step_sizes_material = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
-    step_sizes_distance = [2e-4, 2e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
+    step_sizes_material = [2e-4, 2e-4, 2e-4, 1e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
+    step_sizes_distance = [2e-4, 2e-4, 2e-4, 1e-4, 1e-4, 1e-4, 8e-5, 8e-5, 5e-5, 5e-5, 5e-5, 3e-5, 3e-5, 2e-5, 2e-5]
 
     node_configurations = [5, 8, 9]
     num_iterations_per_config = 2
@@ -621,9 +621,9 @@ def multi_node_recursive_optimization():
                     target_curve,
                     num_nodes=num_nodes,
                     num_mechanisms=8000,  # Back to original
-                    num_iterations=12,    # Increased to 12 iterations
+                    num_iterations=15,    # Increased to 12 iterations
                     pop_size=100,         # Back to original
-                    n_gen=200,            # Back to original
+                    n_gen=300,            # Back to original
                     step_sizes_material=step_sizes_material,
                     step_sizes_distance=step_sizes_distance
                 )
