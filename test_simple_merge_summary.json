@@ -1,0 +1,51 @@
+{
+  "input_files": {
+    "submission1": "/Users/ethrbt/code/2.156/2155-Optimization-Challenge-Problem/overnight_run_20250929_204331/submission.npy",
+    "submission2": "/Users/ethrbt/code/2.156/2155-Optimization-Challenge-Problem/optimized_curve_6.npy"
+  },
+  "output_file": "test_simple_merge.npy",
+  "merge_strategy": "simple_combination_with_1000_limit",
+  "problems": [
+    {
+      "problem": "Problem 1",
+      "submission1_count": 175,
+      "submission2_count": 22,
+      "merged_count": 197
+    },
+    {
+      "problem": "Problem 2",
+      "submission1_count": 191,
+      "submission2_count": 115,
+      "merged_count": 306
+    },
+    {
+      "problem": "Problem 3",
+      "submission1_count": 1000,
+      "submission2_count": 15,
+      "merged_count": 1000
+    },
+    {
+      "problem": "Problem 4",
+      "submission1_count": 761,
+      "submission2_count": 12,
+      "merged_count": 773
+    },
+    {
+      "problem": "Problem 5",
+      "submission1_count": 610,
+      "submission2_count": 17,
+      "merged_count": 627
+    },
+    {
+      "problem": "Problem 6",
+      "submission1_count": 250,
+      "submission2_count": 111,
+      "merged_count": 361
+    }
+  ],
+  "totals": {
+    "submission1_total": 2987,
+    "submission2_total": 292,
+    "merged_total": 3264
+  }
+}
